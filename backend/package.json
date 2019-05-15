@@ -1,0 +1,43 @@
+{
+  "name": "tawrestaurant-backend",
+  "version": "1.0.0",
+  "description": "",
+  "private": true,
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "init": "cp .env.prototype .env && npm run initdb",
+    "initdb": "rm -rf data ; mkdir data",
+    "build": "tsc",
+    "start": "concurrently \"mongod --dbpath data\" \"sleep 3 && node build/main\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eleumasc/TAWRestaurant/tree/master/backend/"
+  },
+  "author": "Battistich, Alvise; Casarin, Samuele",
+  "license": "MIT",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "dotenv": "^8.0.0",
+    "express": "^4.16.4",
+    "express-jwt": "^5.3.1",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^5.5.7",
+    "passport": "^0.4.0",
+    "passport-http": "^0.3.0",
+    "socket.io": "^2.2.0",
+    "socketio-auth": "^0.1.1"
+  },
+  "devDependencies": {
+    "@types/body-parser": "^1.17.0",
+    "@types/express": "^4.16.1",
+    "@types/express-jwt": "0.0.42",
+    "@types/jsonwebtoken": "^8.3.2",
+    "@types/mongoose": "^5.5.1",
+    "@types/node": "^12.0.0",
+    "@types/passport": "^1.0.0",
+    "@types/socket.io": "^2.1.2",
+    "concurrently": "^4.1.0",
+    "typescript": "^3.4.5"
+  }
+}
