@@ -8,8 +8,8 @@ import {
   cookSchema,
   Barman,
   barmanSchema,
-  Cash,
-  cashSchema
+  Casher,
+  casherSchema
 } from "./user";
 import {
   MenuItem,
@@ -49,9 +49,9 @@ export const barmanModel: mongoose.Model<Barman> = userModel.discriminator(
   barmanSchema
 );
 
-export const cashModel: mongoose.Model<Cash> = userModel.discriminator(
-  "Cash",
-  cashSchema
+export const casherModel: mongoose.Model<Casher> = userModel.discriminator(
+  "Casher",
+  casherSchema
 );
 
 // menuItem models

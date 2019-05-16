@@ -27,11 +27,11 @@ export type Barman = BaseUser & {
   totalPreparedBeverages: number;
 };
 
-export type Cash = BaseUser & {
-  role: "Cash";
+export type Casher = BaseUser & {
+  role: "Casher";
 };
 
-export type User = Waiter | Cook | Barman | Cash;
+export type User = Waiter | Cook | Barman | Casher;
 
 export const userSchema = new mongoose.Schema<User>(
   {
@@ -99,4 +99,4 @@ export const barmanSchema: mongoose.Schema<Barman> = new mongoose.Schema({
   }
 });
 
-export const cashSchema: mongoose.Schema<Cash> = new mongoose.Schema({});
+export const casherSchema: mongoose.Schema<Casher> = new mongoose.Schema({});
