@@ -1,13 +1,12 @@
-const mongoose = require("mongoose");
+import mongoose = require("mongoose");
 import * as DB from "./database";
 import { Cook } from "./database/user";
 import { Food } from "./database/menuItem";
 import { Table, TableStatus } from "./database/table";
-import { FoodOrder } from "./database/order";
 const util = require("util");
 
 (async () => {
-  await mongoose.connect("mongoDB://localhost:27017/tawrestaurant", {
+  await mongoose.connect("mongodb://localhost:27017/tawrestaurant", {
     useNewUrlParser: true
   });
   console.log("Connected to MongoDB");
