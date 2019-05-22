@@ -1,8 +1,8 @@
 import mongoose = require("mongoose");
-import * as DB from "./database";
-import { Cook } from "./database/user";
-import { Food } from "./database/menuItem";
-import { Table, TableStatus } from "./database/table";
+import { CookModel, FoodModel, FoodOrderModel, TableModel } from "./models";
+import { Cook } from "./models/user";
+import { Food } from "./models/menuItem";
+import { Table, TableStatus } from "./models/table";
 const util = require("util");
 
 (async () => {
@@ -12,7 +12,7 @@ const util = require("util");
   console.log("Connected to MongoDB");
 
   /* */
-  const chef = new DB.cookModel({
+  const chef = new CookModel({
     username: "ac",
     name: "Antonino",
     surname: "Canavacciuolo"
@@ -27,7 +27,7 @@ const util = require("util");
   } /* */
 
   /* */
-  const roast: Food = new DB.foodModel({
+  const roast: Food = new FoodModel({
     name: "Chicken roast",
     price: 12,
     preparationTime: 24
@@ -41,19 +41,19 @@ const util = require("util");
   } /* */
 
   /* */
-  const cook: Cook = await DB.cookModel.findOne();
+  const cook: Cook = await CookModel.findOne();
   console.log(util.inspect(cook));
 
-  const food: Food = await DB.foodModel.findOne();
+  const food: Food = await FoodModel.findOne();
   console.log(util.inspect(food));
 
-  const order = new DB.foodOrderModel({
+  const order = new FoodOrderModel({
     food: food,
     cook: chef
   }); /* */
 
   /* */
-  const table2: Table = new DB.tableModel({
+  const table2: Table = new TableModel({
     number: 2,
     seats: 4
   });
@@ -65,7 +65,7 @@ const util = require("util");
     process.exit();
   }
 
-  const table7: Table = new DB.tableModel({
+  const table7: Table = new TableModel({
     number: 7,
     seats: 5,
     status: TableStatus.Served,
@@ -83,8 +83,7 @@ const util = require("util");
     process.exit();
   } /* */
 
-  const tables: Table[] = await DB.tableModel
-    .find()
+  const tables: Table[] = await TableModel.find()
     .populate("orders.food")
     .populate("orders.cook")
     .populate("orders.beverage")
