@@ -50,11 +50,13 @@ export const userSchema = new mongoose.Schema<User>(
     },
     salt: {
       type: mongoose.Schema.Types.String,
-      required: true
+      required: true,
+      select: false
     },
     digest: {
       type: mongoose.Schema.Types.String,
-      required: true
+      required: true,
+      select: false
     }
   },
   { discriminatorKey: "role" }

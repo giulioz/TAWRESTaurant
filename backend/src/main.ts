@@ -1,92 +1,34 @@
+require("./config");
+
 import mongoose = require("mongoose");
-import { CookModel, FoodModel, FoodOrderModel, TableModel } from "./models";
-import { Cook } from "./models/user";
-import { Food } from "./models/menuItem";
-import { Table, TableStatus } from "./models/table";
-const util = require("util");
+
+import express = require("express");
+import bodyParser = require("body-parser");
+
+import apiRouter from "./controllers";
 
 (async () => {
-  await mongoose.connect("mongodb://localhost:27017/tawrestaurant", {
+  await mongoose.connect(process.env.MONGODB_URL, {
     useNewUrlParser: true
   });
-  console.log("Connected to MongoDB");
+  console.log("MongoDB connection is open");
 
-  /* */
-  const chef = new CookModel({
-    username: "ac",
-    name: "Antonino",
-    surname: "Canavacciuolo"
+  const app = express();
+
+  app.use(bodyParser.json());
+
+  app.use("/api/v1", apiRouter);
+
+  // Error handling middleware
+  app.use((err, req, res, next) => {
+    return res.status(err.status || 500).json({ error: true, message: err.message });
   });
-  chef.setPassword("secret");
-  try {
-    await chef.save();
-    console.log("user created !");
-  } catch (error) {
-    console.error("Unable to create user: " + error);
-    process.exit();
-  } /* */
 
-  /* */
-  const roast: Food = new FoodModel({
-    name: "Chicken roast",
-    price: 12,
-    preparationTime: 24
+  app.use((req, res, next) => {
+    return res.status(404).json({ error: true, message: "Invalid endpoint" });
   });
-  try {
-    await roast.save();
-    console.log("roast saved !");
-  } catch (error) {
-    console.error("Unable to save roast: " + error);
-    process.exit();
-  } /* */
 
-  /* */
-  const cook: Cook = await CookModel.findOne();
-  console.log(util.inspect(cook));
-
-  const food: Food = await FoodModel.findOne();
-  console.log(util.inspect(food));
-
-  const order = new FoodOrderModel({
-    food: food,
-    cook: chef
-  }); /* */
-
-  /* */
-  const table2: Table = new TableModel({
-    number: 2,
-    seats: 4
+  app.listen(parseInt(process.env.SERVER_PORT), () => {
+    console.log("Listening on port " + process.env.SERVER_PORT);
   });
-  try {
-    await table2.save();
-    console.log("table 2 saved !");
-  } catch (error) {
-    console.error("Unable to save table 2: " + error);
-    process.exit();
-  }
-
-  const table7: Table = new TableModel({
-    number: 7,
-    seats: 5,
-    status: TableStatus.Served,
-    numOfCustomers: 4,
-    orders: [order],
-    ordersTakenAt: new Date(),
-    foodReady: false,
-    beverageReady: true
-  });
-  try {
-    await table7.save();
-    console.log("table 7 saved !");
-  } catch (error) {
-    console.error("Unable to save table 7: " + error);
-    process.exit();
-  } /* */
-
-  const tables: Table[] = await TableModel.find()
-    .populate("orders.food")
-    .populate("orders.cook")
-    .populate("orders.beverage")
-    .populate("orders.barman");
-  console.log(util.inspect(tables, { showHidden: false, depth: null }));
 })();
