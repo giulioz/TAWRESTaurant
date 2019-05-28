@@ -102,7 +102,7 @@ function changePassword(req, res, next) {
       user
         .save()
         .then(() => {
-          return res;
+          return res.send();
         })
         .catch(err => {
           return next(err);
