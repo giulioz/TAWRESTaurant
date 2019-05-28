@@ -46,6 +46,10 @@ export const orderSchema: mongoose.Schema<Order> = new mongoose.Schema(
       type: mongoose.Schema.Types.String,
       required: false,
       default: OrderStatus.Pending
+    },
+    kind: {
+      type: mongoose.Schema.Types.String,
+      required: true
     }
   },
   { discriminatorKey: "kind" }

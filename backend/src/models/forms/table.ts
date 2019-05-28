@@ -29,7 +29,7 @@ export function isChangeStatusRequest(arg: any): boolean {
   return (
     arg &&
     query.action &&
-    enumHasValue(query.action, ChangeStatus) &&
+    enumHasValue(ChangeStatus, query.action) &&
     /*
     middleware verifies that only Cashiers and Waiter can access the endpoint that uses this function
     user.role &&

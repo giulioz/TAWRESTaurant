@@ -1,8 +1,8 @@
 import express = require("express");
 import loginRouter from "./login";
 import usersRouter from "./users";
-// import menuRouter from "./menu";
-// import tablesRouter from "./tables";
+import menuRouter from "./menu";
+import tablesRouter from "./tables";
 
 const routes = [
   {
@@ -17,11 +17,13 @@ const routes = [
   },
   {
     path: "/menu",
-    router: null // menuRouter
+    router: menuRouter,
+    enabled: true
   },
   {
     path: "/tables",
-    router: null // tablesRouter
+    router: tablesRouter,
+    enabled: true
   }
 ];
 

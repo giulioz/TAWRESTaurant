@@ -8,8 +8,9 @@ import {
   isCreateTableForm,
   isChangeStatusRequest,
   ChangeStatus
-} from "../models/forms/tables";
+} from "../models/forms/table";
 import { isTableStatus, Table, TableStatus } from "../models/table";
+import { ObjectId } from "bson";
 
 const router = express.Router();
 
@@ -38,7 +39,7 @@ function getTables(req, res, next) {
   if (status && isTableStatus(status)) {
     filter["status"] = status;
   }
-  if (waiterId) {
+  if (waiterId && ObjectId.isValid(waiterId)) {
     filter["servedBy"] = waiterId;
   }
 
