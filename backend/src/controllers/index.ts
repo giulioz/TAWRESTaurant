@@ -3,6 +3,7 @@ import loginRouter from "./login";
 import usersRouter from "./users";
 import menuRouter from "./menu";
 import tablesRouter from "./tables";
+import ordersRouter from "./orders";
 
 const routes = [
   {
@@ -23,6 +24,11 @@ const routes = [
   {
     path: "/tables",
     router: tablesRouter,
+    enabled: true
+  },
+  {
+    path: "/tables",
+    router: ordersRouter,
     enabled: true
   }
 ];

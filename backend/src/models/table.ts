@@ -21,7 +21,7 @@ export type Table = mongoose.Document & {
   status: TableStatus;
   numOfCustomers: number;
   servedBy: Waiter;
-  orders: Order[];
+  orders: mongoose.Types.DocumentArray<Order>;
   ordersTakenAt: Date;
   foodReady: boolean;
   beverageReady: boolean;
