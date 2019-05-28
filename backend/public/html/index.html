@@ -1,0 +1,27 @@
+<html>
+  <head>
+    <script src="http://localhost:3000/static/js/socket.io.js"></script>
+    <script>
+      const jwt =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOnsiX2lkIjoiNWNlYzRkYjUzMzY0MDQyZGI5NTYzMWQxIiwidXNlcm5hbWUiOiJkZWNpbm8iLCJuYW1lIjoicGFwZXJvbiIsInN1cm5hbWUiOiJkZXBhcGVyb25pIiwicm9sZSI6IkNhc2hpZXIifSwiaWF0IjoxNTU4OTk2MjMzLCJleHAiOjE1NTkwMzk0MzN9.Tduv-ugnh0bx8k2M6x1u-nLsD-5hZV5Esm-LS8J_yQo";
+      const socket = io.connect("http://localhost:3000/", {
+        path: "/api/v1/events",
+        query: "auth_token=" + jwt
+      });
+
+      socket.on("greeting", data => {
+        console.log("greeting" + data);
+      });
+
+      socket.on("connect", () => {
+        console.log("connected");
+      });
+
+      socket.on("error", err => {
+        console.error(err);
+      });
+    </script>
+  </head>
+
+  <body></body>
+</html>

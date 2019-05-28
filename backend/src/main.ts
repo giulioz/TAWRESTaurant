@@ -1,19 +1,23 @@
 require("./config");
 
 import mongoose = require("mongoose");
-
 import express = require("express");
 import bodyParser = require("body-parser");
 
+import { app, server, io } from "./server";
+
 import apiRouter from "./controllers";
+import { ioJwtAuth } from "./middlewares/ioJwtAuth";
+import { error } from "./helpers/error";
 
 (async () => {
   await mongoose.connect(process.env.MONGODB_URL, {
     useNewUrlParser: true
   });
-  console.log("MongoDB connection is open");
+  console.log("Connected to MongoDB");
 
-  const app = express();
+  // DEBUG
+  app.use("/static", express.static("public"));
 
   app.use(bodyParser.json());
 
@@ -21,14 +25,21 @@ import apiRouter from "./controllers";
 
   // Error handling middleware
   app.use((err, req, res, next) => {
-    return res.status(err.status || 500).json({ error: true, message: err.message });
+    return res.status(err.status || 500).json(error(err.message));
   });
 
   app.use((req, res, next) => {
-    return res.status(404).json({ error: true, message: "Invalid endpoint" });
+    return res.status(404).json(error("Invalid endpoint"));
   });
 
-  app.listen(parseInt(process.env.SERVER_PORT), () => {
+  io.use(ioJwtAuth);
+
+  // DEBUG
+  io.on("connection", socket => {
+    socket.emit("greeting", { user: socket.request.user });
+  });
+
+  server.listen(parseInt(process.env.SERVER_PORT), () => {
     console.log("Listening on port " + process.env.SERVER_PORT);
   });
 })();

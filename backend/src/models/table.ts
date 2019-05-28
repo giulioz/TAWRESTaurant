@@ -1,5 +1,6 @@
 import mongoose = require("mongoose");
-import { Waiter } from "./user";
+import { enumHasValue } from "../helpers/enumHasValue";
+import { UserRole, Waiter } from "./user";
 import { Order, orderSchema } from "./order";
 
 export enum TableStatus {
@@ -7,6 +8,10 @@ export enum TableStatus {
   NotServed = "not-served",
   Waiting = "waiting",
   Served = "served"
+}
+
+export function isTableStatus(arg: any): arg is TableStatus {
+  return arg && typeof arg === "string" && enumHasValue(TableStatus, arg);
 }
 
 export type Table = mongoose.Document & {
@@ -37,7 +42,7 @@ export const tableSchema: mongoose.Schema<Table> = new mongoose.Schema({
   },
   servedBy: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Waiter",
+    ref: UserRole.Waiter,
     required: false,
     default: null
   },

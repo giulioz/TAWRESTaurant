@@ -6,9 +6,12 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "init": "cp .env.prototype .env && npm run init-data",
-    "init-data": "rm -rf data && mkdir data && echo \"In the future some initial data will be loaded on the database\"",
+    "win-init": "copy .env.prototype .env && npm run init-data",
+    "init-data": "rm -rf data && mkdir data",
+    "win-init-data": "rmdir /S /Q data && mkdir data",
     "build": "tsc",
     "start-mongodb": "mongod --dbpath data",
+    "populate": "node build/populate",
     "start": "node build/main"
   },
   "repository": {
@@ -20,14 +23,14 @@
   "dependencies": {
     "body-parser": "^1.19.0",
     "dotenv": "^8.0.0",
-    "express": "^4.16.4",
+    "express": "^4.17.0",
     "express-jwt": "^5.3.1",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.5.7",
     "passport": "^0.4.0",
     "passport-http": "^0.3.0",
     "socket.io": "^2.2.0",
-    "socketio-auth": "^0.1.1"
+    "socketio-jwt-auth": "^0.1.0"
   },
   "devDependencies": {
     "@types/body-parser": "^1.17.0",

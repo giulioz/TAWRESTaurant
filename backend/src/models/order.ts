@@ -1,10 +1,21 @@
 import mongoose = require("mongoose");
-import { Cook, Barman } from "./user";
-import { Food, Beverage } from "./menuItem";
+import { enumHasValue } from "../helpers/enumHasValue";
+import { UserRole, Cook, Barman } from "./user";
+import { MenuItemKind, Food, Beverage } from "./menuItem";
 
-type BaseOrder = mongoose.Document & {
+export enum OrderKind {
+  FoodOrder = "FoodOrder",
+  BeverageOrder = "BeverageOrder"
+}
+
+export function isOrderKind(arg: any): arg is OrderKind {
+  return arg && typeof arg === "string" && enumHasValue(OrderKind, arg);
+}
+
+export type Order = mongoose.Document & {
   readonly _id: mongoose.Schema.Types.ObjectId;
   status: OrderStatus;
+  kind: OrderKind;
 };
 
 export enum OrderStatus {
@@ -13,19 +24,21 @@ export enum OrderStatus {
   Ready = "ready"
 }
 
-export type FoodOrder = BaseOrder & {
-  kind: "FoodOrder";
+export function isOrderStatus(arg: any): arg is OrderStatus {
+  return arg && typeof arg === "string" && enumHasValue(OrderStatus, arg);
+}
+
+export type FoodOrder = Order & {
+  kind: OrderKind.FoodOrder;
   food: Food;
   cook: Cook;
 };
 
-export type BeverageOrder = BaseOrder & {
-  kind: "BeverageOrder";
+export type BeverageOrder = Order & {
+  kind: OrderKind.BeverageOrder;
   beverage: Beverage;
   barman: Barman;
 };
-
-export type Order = FoodOrder | BeverageOrder;
 
 export const orderSchema: mongoose.Schema<Order> = new mongoose.Schema(
   {
@@ -41,13 +54,13 @@ export const orderSchema: mongoose.Schema<Order> = new mongoose.Schema(
 export const foodOrderSchema: mongoose.Schema<FoodOrder> = new mongoose.Schema({
   food: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Food",
+    ref: MenuItemKind.Food,
     required: false,
     default: null
   },
   cook: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Cook",
+    ref: UserRole.Cook,
     required: false,
     default: null
   }
@@ -57,13 +70,13 @@ export const beverageOrderSchema: mongoose.Schema<
 > = new mongoose.Schema({
   beverage: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Beverage",
+    ref: MenuItemKind.Beverage,
     required: false,
     default: null
   },
   barman: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Barman",
+    ref: UserRole.Barman,
     required: false,
     default: null
   }

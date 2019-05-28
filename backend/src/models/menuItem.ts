@@ -1,21 +1,30 @@
 import mongoose = require("mongoose");
+import { enumHasValue } from "../helpers/enumHasValue";
 
-type BaseMenuItem = mongoose.Document & {
+export enum MenuItemKind {
+  Food = "Food",
+  Beverage = "Beverage"
+}
+
+export function isMenuItemKind(arg: any): arg is MenuItemKind {
+  return arg && typeof arg === "string" && enumHasValue(MenuItemKind, arg);
+}
+
+export type MenuItem = mongoose.Document & {
   readonly _id: mongoose.Schema.Types.ObjectId;
   name: string;
   price: number;
   preparationTime: number;
+  kind: MenuItemKind;
 };
 
-export type Food = BaseMenuItem & {
-  kind: "Food";
+export type Food = MenuItem & {
+  kind: MenuItemKind.Food;
 };
 
-export type Beverage = BaseMenuItem & {
-  kind: "Beverage";
+export type Beverage = MenuItem & {
+  kind: MenuItemKind.Beverage;
 };
-
-export type MenuItem = Food | Beverage;
 
 export const menuItemSchema: mongoose.Schema<MenuItem> = new mongoose.Schema(
   {

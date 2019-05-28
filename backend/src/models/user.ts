@@ -1,37 +1,48 @@
 import mongoose = require("mongoose");
 import crypto = require("crypto");
+import { enumHasValue } from "../helpers/enumHasValue";
 
-type BaseUser = mongoose.Document & {
+export enum UserRole {
+  Waiter = "Waiter",
+  Cook = "Cook",
+  Barman = "Barman",
+  Cashier = "Cashier"
+}
+
+export function isUserRole(arg: any): arg is UserRole {
+  return arg && typeof arg === "string" && enumHasValue(UserRole, arg);
+}
+
+export type User = mongoose.Document & {
   readonly _id: mongoose.Schema.Types.ObjectId;
   username: string;
   name: string;
   surname: string;
+  role: UserRole;
   salt: string;
   digest: string;
   setPassword: (password: string) => void;
   validatePassword: (password: string) => boolean;
 };
 
-export type Waiter = BaseUser & {
-  role: "Waiter";
+export type Waiter = User & {
+  role: UserRole.Waiter;
   totalServedCustomers: number;
 };
 
-export type Cook = BaseUser & {
-  role: "Cook";
+export type Cook = User & {
+  role: UserRole.Cook;
   totalPreparedDishes: number;
 };
 
-export type Barman = BaseUser & {
-  role: "Barman";
+export type Barman = User & {
+  role: UserRole.Barman;
   totalPreparedBeverages: number;
 };
 
-export type Casher = BaseUser & {
-  role: "Casher";
+export type Cashier = User & {
+  role: UserRole.Cashier;
 };
-
-export type User = Waiter | Cook | Barman | Casher;
 
 export const userSchema = new mongoose.Schema<User>(
   {
@@ -64,7 +75,6 @@ export const userSchema = new mongoose.Schema<User>(
 
 userSchema.methods.setPassword = function(password: string) {
   this.salt = crypto.randomBytes(16).toString("hex");
-
   var hmac = crypto.createHmac("sha512", this.salt);
   hmac.update(password);
   this.digest = hmac.digest("hex");
@@ -101,4 +111,4 @@ export const barmanSchema: mongoose.Schema<Barman> = new mongoose.Schema({
   }
 });
 
-export const casherSchema: mongoose.Schema<Casher> = new mongoose.Schema({});
+export const cashierSchema: mongoose.Schema<Cashier> = new mongoose.Schema({});

@@ -1,5 +1,6 @@
 import mongoose = require("mongoose");
 import {
+  UserRole,
   User,
   userSchema,
   Waiter,
@@ -8,10 +9,11 @@ import {
   cookSchema,
   Barman,
   barmanSchema,
-  Casher,
-  casherSchema
+  Cashier,
+  cashierSchema
 } from "./user";
 import {
+  MenuItemKind,
   MenuItem,
   menuItemSchema,
   Food,
@@ -20,6 +22,7 @@ import {
   beverageSchema
 } from "./menuItem";
 import {
+  OrderKind,
   FoodOrder,
   foodOrderSchema,
   BeverageOrder,
@@ -35,23 +38,23 @@ export const UserModel: mongoose.Model<User> = mongoose.model(
 );
 
 export const WaiterModel: mongoose.Model<Waiter> = UserModel.discriminator(
-  "Waiter",
+  UserRole.Waiter,
   waiterSchema
 );
 
 export const CookModel: mongoose.Model<Cook> = UserModel.discriminator(
-  "Cook",
+  UserRole.Cook,
   cookSchema
 );
 
 export const BarmanModel: mongoose.Model<Barman> = UserModel.discriminator(
-  "Barman",
+  UserRole.Barman,
   barmanSchema
 );
 
-export const CasherModel: mongoose.Model<Casher> = UserModel.discriminator(
-  "Casher",
-  casherSchema
+export const CashierModel: mongoose.Model<Cashier> = UserModel.discriminator(
+  UserRole.Cashier,
+  cashierSchema
 );
 
 // menuItem models
@@ -62,13 +65,13 @@ export const MenuItemModel: mongoose.Model<MenuItem> = mongoose.model(
 );
 
 export const FoodModel: mongoose.Model<Food> = MenuItemModel.discriminator(
-  "Food",
+  MenuItemKind.Food,
   foodSchema
 );
 
 export const BeverageModel: mongoose.Model<
   Beverage
-> = MenuItemModel.discriminator("Beverage", beverageSchema);
+> = MenuItemModel.discriminator(MenuItemKind.Beverage, beverageSchema);
 
 // table/order models
 
@@ -78,11 +81,11 @@ const tableOrdersPath: mongoose.Schema.Types.DocumentArray = <
 
 export const FoodOrderModel: mongoose.Model<
   FoodOrder
-> = tableOrdersPath.discriminator("FoodOrder", foodOrderSchema);
+> = tableOrdersPath.discriminator(OrderKind.FoodOrder, foodOrderSchema);
 
 export const BeverageOrderModel: mongoose.Model<
   BeverageOrder
-> = tableOrdersPath.discriminator("BeverageOrder", beverageOrderSchema);
+> = tableOrdersPath.discriminator(OrderKind.BeverageOrder, beverageOrderSchema);
 
 export const TableModel: mongoose.Model<Table> = mongoose.model(
   "Table",
