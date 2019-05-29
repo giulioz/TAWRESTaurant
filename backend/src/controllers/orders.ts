@@ -40,13 +40,53 @@ router.delete(
 );
 
 function getTableOrders(req, res, next) {
-  TableModel.findOne({ _id: req.params.id }).populate({ path: "orders.food orders.beverage" }).then((table: Table) => {
-    if (!table) return res.status(404).json(error("Table not found"));
+  TableModel.findOne({ _id: req.params.id })
+    .populate({ path: "orders.food orders.beverage" })
+    .then((table: Table) => {
+      if (!table) return res.status(404).json(error("Table not found"));
 
-    const { kind, status } = req.query;
+      const { kind, status } = req.query;
 
+      return res.json(
+        table.orders.map((val: Order) => {
+          if (
+            (!isOrderKind(kind) || kind === val.kind) &&
+            (!isOrderStatus(status) || status === val.status)
+          )
+            return val;
+        })
+      );
+    });
+}
+
+function getAllOrders(req, res, next) {
+  const { kind, status } = req.query;
+  TableModel.aggregate([
+    { $unwind: "$orders" },
+    {
+      $project: {
+        _id: "$orders._id",
+        status: "$orders.status",
+        kind: "$orders.kind",
+        food: { $ifNull: ["$orders.food", "$$REMOVE"] },
+        beverage: { $ifNull: ["$orders.beverage", "$$REMOVE"] },
+        cook: { $ifNull: ["$orders.cook", "$$REMOVE"] },
+        barman: { $ifNull: ["$orders.barman", "$$REMOVE"] }
+      }
+    },
+    {
+      $lookup: {
+        from: "menuitems", //casesensitive
+        localField: "food",
+        foreignField: "_id",
+        as: "food"
+      }
+    }
+  ]).exec((err, orders) => {
+    if (err) return next(err);
+    console.log(orders);
     return res.json(
-      table.orders.map((val: Order) => {
+      orders.map((val: Order) => {
         if (
           (!isOrderKind(kind) || kind === val.kind) &&
           (!isOrderStatus(status) || status === val.status)
@@ -57,37 +97,15 @@ function getTableOrders(req, res, next) {
   });
 }
 
-function getAllOrders(req, res, next) {
-  const { kind, status } = req.query;
-  TableModel.aggregate([
-    { $unwind: "$orders" },
-    {
-      $group: {
-        _id: null,
-        orders: { $push: "$orders" }
-      }
-    }
-  ]).exec((err, result) => {
-    if (err)
-      return next(err)
-    console.log(result);
-    return res.json(result[0].orders.map((val: Order) => {
-      if (
-        (!isOrderKind(kind) || kind === val.kind) &&
-        (!isOrderStatus(status) || status === val.status)
-      )
-        return val;
-    }));
-  })
-}
-
 function getOrderById(req, res, next) {
-  TableModel.findOne({ _id: req.params.id }).populate({ path: "orders.food orders.beverage" }).then((table: Table) => {
-    if (!table) return res.status(404).json(error("Table not found"));
-    var order = table.orders.id(req.params.ido);
-    if (!order) return res.status(404).json(error("Order not found"));
-    return res.json(order);
-  });
+  TableModel.findOne({ _id: req.params.id })
+    .populate({ path: "orders.food orders.beverage" })
+    .then((table: Table) => {
+      if (!table) return res.status(404).json(error("Table not found"));
+      var order = table.orders.id(req.params.ido);
+      if (!order) return res.status(404).json(error("Order not found"));
+      return res.json(order);
+    });
 }
 
 function createOrder(req, res, next) {
@@ -114,7 +132,7 @@ function createOrder(req, res, next) {
   });
 }
 
-function changeStatus(req, res, next) { }
+function changeStatus(req, res, next) {}
 
 function deleteOrder(req, res, next) {
   TableModel.findOne({ _id: req.params.id }).then((table: Table) => {
