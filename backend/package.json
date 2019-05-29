@@ -12,7 +12,8 @@
     "build": "tsc",
     "start-mongodb": "mongod --dbpath data",
     "populate": "node build/populate",
-    "start": "node build/main"
+    "start": "node build/main",
+    "rebuild": "npm run build ; npm run start"
   },
   "repository": {
     "type": "git",
