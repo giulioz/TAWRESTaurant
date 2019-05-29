@@ -71,7 +71,8 @@ function getAllOrders(req, res, next) {
         food: { $ifNull: ["$orders.food", "$$REMOVE"] },
         beverage: { $ifNull: ["$orders.beverage", "$$REMOVE"] },
         cook: { $ifNull: ["$orders.cook", "$$REMOVE"] },
-        barman: { $ifNull: ["$orders.barman", "$$REMOVE"] }
+        barman: { $ifNull: ["$orders.barman", "$$REMOVE"] },
+        table: "$_id"
       }
     },
     {
@@ -81,7 +82,17 @@ function getAllOrders(req, res, next) {
         foreignField: "_id",
         as: "food"
       }
-    }
+    },
+    {
+      $lookup: {
+        from: "menuitems", //casesensitive
+        localField: "beverage",
+        foreignField: "_id",
+        as: "beverage"
+      }
+    },
+    { $unwind: { path: "$food", preserveNullAndEmptyArrays: true } },
+    { $unwind: { path: "$beverage", preserveNullAndEmptyArrays: true } }
   ]).exec((err, orders) => {
     if (err) return next(err);
     console.log(orders);
