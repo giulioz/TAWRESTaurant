@@ -27,7 +27,7 @@ const routes = [
     enabled: true
   },
   {
-    path: "/tables",
+    path: "/",
     router: ordersRouter,
     enabled: true
   }

@@ -9,7 +9,7 @@ import {
   isChangeStatusRequest,
   ChangeStatus
 } from "../models/forms/table";
-import { isTableStatus, Table, TableStatus } from "../models/table";
+import { isTableStatus, Table, TableStatus, OrderStatus } from "../models/table";
 import { ObjectId } from "bson";
 
 const router = express.Router();
@@ -101,8 +101,8 @@ function changeStatus(req, res, next) {
         table.servedBy = null;
         table.orders = null;
         table.ordersTakenAt = null;
-        table.foodReady = false;
-        table.beverageReady = false;
+        table.foodStatus = null;
+        table.beverageStatus = null;
       }
       table
         .save()

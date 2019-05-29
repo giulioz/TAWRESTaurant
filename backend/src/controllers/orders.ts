@@ -13,30 +13,33 @@ import {
   orderSchema
 } from "../models/order";
 import { isCreateOrderForm } from "../models/forms/order";
+import { Types } from "mongoose";
 
 const router = express.Router();
 
 router.use(jwtAuth);
 
-router.get("/:id/orders", getOrders);
+router.get("/tables/:id/orders", getTableOrders);
 
-router.get("/:id/orders/:ido", getOrderById);
+router.get("/orders", getAllOrders);
 
-router.post("/:id/orders", userHasRole([UserRole.Waiter]), createOrder);
+router.get("/tables/:id/orders/:ido", getOrderById);
+
+router.post("/tables/:id/orders", userHasRole([UserRole.Waiter]), createOrder);
 
 router.put(
-  "/:id/orders/:ido",
+  "/tables/:id/orders/:ido",
   userHasRole([UserRole.Cook, UserRole.Barman]),
   changeStatus
 );
 
 router.delete(
-  "/:id/orders/:ido",
+  "/tables/:id/orders/:ido",
   userHasRole([UserRole.Cashier]),
   deleteOrder
 );
 
-function getOrders(req, res, next) {
+function getTableOrders(req, res, next) {
   TableModel.findOne({ _id: req.params.id }).populate({ path: "orders.food orders.beverage" }).then((table: Table) => {
     if (!table) return res.status(404).json(error("Table not found"));
 
@@ -52,6 +55,30 @@ function getOrders(req, res, next) {
       })
     );
   });
+}
+
+function getAllOrders(req, res, next) {
+  const { kind, status } = req.query;
+  TableModel.aggregate([
+    { $unwind: "$orders" },
+    {
+      $group: {
+        _id: null,
+        orders: { $push: "$orders" }
+      }
+    }
+  ]).exec((err, result) => {
+    if (err)
+      return next(err)
+    console.log(result);
+    return res.json(result[0].orders.map((val: Order) => {
+      if (
+        (!isOrderKind(kind) || kind === val.kind) &&
+        (!isOrderStatus(status) || status === val.status)
+      )
+        return val;
+    }));
+  })
 }
 
 function getOrderById(req, res, next) {

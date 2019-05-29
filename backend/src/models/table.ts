@@ -5,8 +5,13 @@ import { Order, orderSchema } from "./order";
 
 export enum TableStatus {
   Free = "free",
-  NotServed = "not-served",
+  NotServed = "notserved",
+  Served = "served",
+}
+
+export enum OrderStatus {
   Waiting = "waiting",
+  Ready = "ready",
   Served = "served"
 }
 
@@ -19,12 +24,14 @@ export type Table = mongoose.Document & {
   number: number;
   seats: number;
   status: TableStatus;
+  foodStatus: OrderStatus;
+  beverageStatus: OrderStatus;
   numOfCustomers: number;
   servedBy: Waiter;
   orders: mongoose.Types.DocumentArray<Order>;
   ordersTakenAt: Date;
-  foodReady: boolean;
-  beverageReady: boolean;
+  foodReadyAt: Date;
+  beverageReadyAt: Date;
 };
 
 export const tableSchema: mongoose.Schema<Table> = new mongoose.Schema({

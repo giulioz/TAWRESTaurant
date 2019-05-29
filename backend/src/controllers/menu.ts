@@ -20,7 +20,7 @@ router.get("/:id", getMenuItemById);
 
 router.post("/", userHasRole([UserRole.Cashier]), createMenuItem);
 
-router.put("/:id", userHasRole([UserRole.Cashier]), changeMenuItem);
+//router.put("/:id", userHasRole([UserRole.Cashier]), changeMenuItem);
 
 router.delete("/:id", userHasRole([UserRole.Cashier]), deleteMenuItem);
 
