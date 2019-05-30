@@ -40,16 +40,20 @@ export const endpoints = {
       GET: { guard: ["middleware"], use: getUsers }
     },
     "/byId/:id": {
-      GET: { res: "User" },
-      PUT: { body: "{password}", res: "User" },
-      DELETE: { res: "User" }
+      "/": {
+        GET: { res: "User" },
+        DELETE: { res: "nothing" }
+      },
+      "/password": {
+        PUT: { body: "{password}", res: "User" }
+      }
     },
     "/barmans": {
       "/": {
         GET: { res: "Array<Barman>" },
         POST: { body: "{username, name, surname, password}", res: "Barman" }
       },
-      "/:id/orders": {
+      "/byId/:id/orders": {
         GET: { res: "Array<BeverageOrder>" }
       }
     },
@@ -64,7 +68,7 @@ export const endpoints = {
         GET: { res: "Array<Cook>" },
         POST: { body: "{username, name, surname, password}", res: "Cook" }
       },
-      "/:id/orders": {
+      "/byId/:id/orders": {
         GET: { res: "Array<FoodOrder>" }
       }
     },
@@ -73,7 +77,7 @@ export const endpoints = {
         GET: { res: "Array<Waiter>" },
         POST: { body: "{username, name, surname, password}", res: "Waiter" }
       },
-      "/:id/tables": {
+      "/byId/:id/tables": {
         GET: { res: "Array<Table>" }
       }
     }
@@ -96,7 +100,7 @@ export const endpoints = {
     "/": {
       GET: {
         query:
-          "{status: tableStatus, foodOrderStatus, beverageOrderStatus, seats}",
+          "{status: seats, tableStatus, foodOrdersStatus, beverageOrdersStatus}",
         res: "Array<Table>"
       }
     },
@@ -113,7 +117,7 @@ export const endpoints = {
         "/byId/:id": {
           GET: { res: "Order" },
           PUT: { action: '"assign" | "notify"', res: "Order" },
-          DELETE: { res: "Order" }
+          DELETE: { res: "nothing" }
         },
         "/foodOrders": {
           GET: { query: "{status}", res: " Array<FoodOrder>" },
