@@ -46,6 +46,7 @@ export const orderSchema: mongoose.Schema<Order> = new mongoose.Schema(
   {
     table: {
       type: mongoose.Schema.Types.ObjectId,
+      required: true,
       ref: "Table"
     },
     status: {

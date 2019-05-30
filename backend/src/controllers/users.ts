@@ -7,7 +7,10 @@ import {
   WaiterModel,
   CookModel,
   BarmanModel,
-  CashierModel
+  CashierModel,
+  BeverageOrderModel,
+  FoodOrderModel,
+  TableModel
 } from "../models";
 import { UserRole, isUserRole, User } from "../models/user";
 import { isCreateUserForm, isChangePasswordForm } from "../models/forms/user";
@@ -17,6 +20,71 @@ const router = express.Router();
 router.use(jwtAuth);
 
 router.get("/", getUsers);
+
+router
+  .route("/barmans")
+  .get((req, res, next) => {
+    req.query = { role: UserRole.Barman };
+    next();
+  }, getUsers)
+  .post(userHasRole([UserRole.Cashier]), (req, res, next) => {
+    req.body.role = UserRole.Barman;
+    next();
+  });
+
+router
+  .route("/cashiers")
+  .get((req, res, next) => {
+    req.query = { role: UserRole.Cashier };
+    next();
+  }, getUsers)
+  .post(userHasRole([UserRole.Cashier]), (req, res, next) => {
+    req.body.role = UserRole.Cashier;
+    next();
+  });
+
+router
+  .route("/cooks")
+  .get((req, res, next) => {
+    req.query = { role: UserRole.Cook };
+    next();
+  }, getUsers)
+  .post(userHasRole([UserRole.Cashier]), (req, res, next) => {
+    req.body.role = UserRole.Cook;
+    next();
+  });
+
+router.get("/cooks/byId/:id/orders", (req, res) => {
+  let id = req.params.id;
+  FoodOrderModel.find({ cook: id }).then(orders => {
+    res.json(orders);
+  });
+});
+
+router
+  .route("/waiters")
+  .get((req, res, next) => {
+    req.query = { role: UserRole.Waiter };
+    next();
+  }, getUsers)
+  .post(userHasRole([UserRole.Cashier]), (req, res, next) => {
+    req.body.role = UserRole.Waiter;
+    next();
+  });
+
+router.get("/waiters/byId/:id/tables", (req, res) => {
+  let id = req.params.id;
+  TableModel.find({ servedBy: id }).then(tables => {
+    res.json(tables);
+  });
+});
+
+router.get("/barmans/byId/:id/orders", (req, res) => {
+  let id = req.params.id;
+  BeverageOrderModel.find({ barman: id }).then(orders => {
+    res.json(orders);
+  });
+});
 
 router.get("/:id", getUserById);
 
@@ -28,13 +96,9 @@ router.delete("/:id", userHasRole([UserRole.Cashier]), deleteUser);
 
 export function getUsers(req, res, next) {
   const filter = {};
-  if (req.query.username) {
-    filter["username"] = { $regex: `.*${req.query.username.trim()}.*` };
-  }
   if (req.query.role) {
     filter["role"] = isUserRole(req.query.role) ? req.query.role : "";
   }
-
   UserModel.find(filter)
     .then(users => {
       return res.json(users);
@@ -113,7 +177,7 @@ export function changePassword(req, res, next) {
     });
 }
 
-function deleteUser(req, res, next) {
+export function deleteUser(req, res, next) {
   UserModel.findById(req.params.id)
     .then(user => {
       if (!user) {

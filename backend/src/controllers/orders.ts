@@ -109,14 +109,14 @@ function getAllOrders(req, res, next) {
 }
 
 function getOrderById(req, res, next) {
-  TableModel.findOne({ _id: req.params.id })
+  /*TableModel.findOne({ _id: req.params.id })
     .populate({ path: "orders.food orders.beverage" })
     .then((table: Table) => {
       if (!table) return res.status(404).json(error("Table not found"));
       var order = table.orders.id(req.params.ido);
       if (!order) return res.status(404).json(error("Order not found"));
       return res.json(order);
-    });
+    });*/
 }
 
 function createOrder(req, res, next) {
@@ -146,7 +146,7 @@ function createOrder(req, res, next) {
 function changeStatus(req, res, next) {}
 
 function deleteOrder(req, res, next) {
-  TableModel.findOne({ _id: req.params.id }).then((table: Table) => {
+  /*TableModel.findOne({ _id: req.params.id }).then((table: Table) => {
     if (!table) return res.status(404).json(error("Table not found"));
     var order = table.orders.id(req.params.ido);
     if (!order) return res.status(404).json(error("Order not found"));
@@ -157,7 +157,7 @@ function deleteOrder(req, res, next) {
         return res.send();
       })
       .catch(err => next(err));
-  });
+  });*/
 }
 
 export default router;

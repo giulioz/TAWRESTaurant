@@ -9,12 +9,18 @@ import { app, server, io } from "./server";
 import apiRouter from "./controllers";
 import { ioJwtAuth } from "./middlewares/ioJwtAuth";
 import { error } from "./helpers/error";
+import { addParams } from "./middlewares/addParams";
 
 (async () => {
   await mongoose.connect(process.env.MONGODB_URL, {
     useNewUrlParser: true
   });
   console.log("Connected to MongoDB");
+
+  app.all("/:id", addParams("id", "id"));
+  app.all("/:id", (req, res, next) => {
+    console.log(req.urlParams.id);
+  });
 
   // DEBUG
   app.use("/static", express.static("public"));

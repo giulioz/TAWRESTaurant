@@ -1,4 +1,10 @@
-import { getUsers, getUserById, changePassword, createUser } from "./users";
+import {
+  getUsers,
+  getUserById,
+  changePassword,
+  createUser,
+  deleteUser
+} from "./users";
 import { userHasRole } from "../middlewares/userHasRole";
 import { UserRole } from "../models/user";
 
@@ -10,21 +16,27 @@ type METHOD = {
 type Endpoint = {
   route: String;
   middleware?: [Function];
-  endpoints?: [Endpoint];
+  endpoints?: Array<Endpoint>;
   GET?: METHOD;
   POST?: METHOD;
   PUT?: METHOD;
   DELETE?: METHOD;
 };
 
-const exampleUsers: Endpoint = {
+const users: Endpoint = {
   route: "/users",
   endpoints: [
     {
       route: "/byId:id",
       GET: { use: getUserById },
       PUT: { guard: [userHasRole([UserRole.Cashier])], use: changePassword },
-      DELETE: { guard: [userHasRole([UserRole.Cashier])], use: getUserById }
+      DELETE: { guard: [userHasRole([UserRole.Cashier])], use: deleteUser }
+    },
+    {
+      route: "/barmans",
+      GET: { use: getUserById },
+      PUT: { guard: [userHasRole([UserRole.Cashier])], use: changePassword },
+      DELETE: { guard: [userHasRole([UserRole.Cashier])], use: deleteUser }
     }
   ],
   GET: { guard: null, use: getUsers },
@@ -100,7 +112,7 @@ export const endpoints = {
     "/": {
       GET: {
         query:
-          "{status: seats, tableStatus, foodOrdersStatus, beverageOrdersStatus}",
+          "{status, seats, tableStatus, foodOrdersStatus, beverageOrdersStatus}",
         res: "Array<Table>"
       }
     },
