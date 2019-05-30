@@ -2,6 +2,7 @@ import mongoose = require("mongoose");
 import { enumHasValue } from "../helpers/enumHasValue";
 import { UserRole, Cook, Barman } from "./user";
 import { MenuItemKind, Food, Beverage } from "./menuItem";
+import { Table } from "./table";
 
 export enum OrderKind {
   FoodOrder = "FoodOrder",
@@ -14,6 +15,7 @@ export function isOrderKind(arg: any): arg is OrderKind {
 
 export type Order = mongoose.Document & {
   readonly _id: mongoose.Schema.Types.ObjectId;
+  table: Table;
   status: OrderStatus;
   kind: OrderKind;
 };
@@ -42,6 +44,10 @@ export type BeverageOrder = Order & {
 
 export const orderSchema: mongoose.Schema<Order> = new mongoose.Schema(
   {
+    table: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Table"
+    },
     status: {
       type: mongoose.Schema.Types.String,
       required: false,

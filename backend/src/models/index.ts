@@ -23,6 +23,8 @@ import {
 } from "./menuItem";
 import {
   OrderKind,
+  Order,
+  orderSchema,
   FoodOrder,
   foodOrderSchema,
   BeverageOrder,
@@ -73,19 +75,22 @@ export const BeverageModel: mongoose.Model<
   Beverage
 > = MenuItemModel.discriminator(MenuItemKind.Beverage, beverageSchema);
 
-// table/order models
+// order models
 
-const tableOrdersPath: mongoose.Schema.Types.DocumentArray = <
-  mongoose.Schema.Types.DocumentArray
->tableSchema.path("orders");
+export const OrderModel: mongoose.Model<Order> = mongoose.model(
+  "Order",
+  orderSchema
+);
 
 export const FoodOrderModel: mongoose.Model<
   FoodOrder
-> = tableOrdersPath.discriminator(OrderKind.FoodOrder, foodOrderSchema);
+> = OrderModel.discriminator(OrderKind.FoodOrder, foodOrderSchema);
 
 export const BeverageOrderModel: mongoose.Model<
   BeverageOrder
-> = tableOrdersPath.discriminator(OrderKind.BeverageOrder, beverageOrderSchema);
+> = OrderModel.discriminator(OrderKind.BeverageOrder, beverageOrderSchema);
+
+// table models
 
 export const TableModel: mongoose.Model<Table> = mongoose.model(
   "Table",
