@@ -83,7 +83,7 @@ router
     );
   })
   .put((req, res, next) => {
-    OrderModel.findOne({ _id: req.params.id, table: req.params.id }).then(
+    OrderModel.findOne({ _id: req.params.ido, table: req.params.id }).then(
       (order: any) => {
         if (!order) return res.status(404).json(error("Order not found"));
         if (req.query.action === "assign") {
@@ -110,11 +110,17 @@ router
     );
   })
   .delete((req, res, next) => {
-    OrderModel.deleteOne({ _id: req.params.id, table: req.params.id })
-      .then(() => {
-        res.send();
-      })
-      .catch(err => next(err));
+    OrderModel.count({ _id: req.params.ido, table: req.params.id }).then(
+      count => {
+        if (count > 0)
+          OrderModel.deleteOne({ _id: req.params.ido })
+            .then(() => {
+              res.send();
+            })
+            .catch(err => next(err));
+        else res.status(404).json(error("Order not found"));
+      }
+    );
   });
 
 router
