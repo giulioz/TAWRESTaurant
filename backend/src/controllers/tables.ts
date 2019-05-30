@@ -36,9 +36,10 @@ router
           return res.status(404).json(error("Table not found"));
         }
         return res.json(
-          table.orders.map(order => {
+          table.orders.filter(order => {
             if (!req.query.status || order.status === req.query.status)
-              return order;
+              return true;
+            return false;
           })
         );
       })
@@ -134,14 +135,14 @@ router
         }
         console.log(table.orders);
         return res.json(
-          table.orders.map(order => {
+          table.orders.filter(order => {
             console.log(order);
             if (
               (!req.query.status || order.status === req.query.status) &&
               order.kind === OrderKind.FoodOrder
-            ) {
-              return order;
-            }
+            )
+              return true;
+            return false;
           })
         );
       })
@@ -190,12 +191,13 @@ router
           return res.status(404).json(error("Table not found"));
         }
         return res.json(
-          table.orders.map(order => {
+          table.orders.filter(order => {
             if (
               (!req.query.status || order.status === req.query.status) &&
               order.kind === OrderKind.BeverageOrder
             )
-              return order;
+              return true;
+            return false;
           })
         );
       })
