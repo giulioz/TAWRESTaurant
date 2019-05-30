@@ -26,7 +26,7 @@ router.put("/:id/password", userHasRole([UserRole.Cashier]), changePassword);
 
 router.delete("/:id", userHasRole([UserRole.Cashier]), deleteUser);
 
-function getUsers(req, res, next) {
+export function getUsers(req, res, next) {
   const filter = {};
   if (req.query.username) {
     filter["username"] = { $regex: `.*${req.query.username.trim()}.*` };
@@ -44,7 +44,7 @@ function getUsers(req, res, next) {
     });
 }
 
-function getUserById(req, res, next) {
+export function getUserById(req, res, next) {
   UserModel.findOne({ _id: req.params.id })
     .then(user => {
       if (!user) {
@@ -57,7 +57,7 @@ function getUserById(req, res, next) {
     });
 }
 
-function createUser(req, res, next) {
+export function createUser(req, res, next) {
   if (!isCreateUserForm(req.body)) {
     return res.status(400).json(error("Bad request"));
   }
@@ -88,7 +88,7 @@ function createUser(req, res, next) {
     });
 }
 
-function changePassword(req, res, next) {
+export function changePassword(req, res, next) {
   if (!isChangePasswordForm(req.body)) {
     return res.status(400).json(error("Bad request"));
   }
