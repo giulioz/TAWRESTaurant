@@ -133,10 +133,8 @@ router
         if (!table) {
           return res.status(404).json(error("Table not found"));
         }
-        console.log(table.orders);
         return res.json(
           table.orders.filter(order => {
-            console.log(order);
             if (
               (!req.query.status || order.status === req.query.status) &&
               order.kind === OrderKind.FoodOrder
