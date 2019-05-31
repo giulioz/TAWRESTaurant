@@ -2,6 +2,7 @@ import { isTableStatus } from "../table";
 import { enumHasValue } from "../../helpers/enumHasValue";
 import { Query } from "mongoose";
 import { UserRole } from "../user";
+import { isUndefined } from "util";
 
 export type CreateTableForm = {
   number: Number;
@@ -24,7 +25,7 @@ export function isCreateTableForm(arg: any): arg is CreateTableForm {
   );
 }
 
-export function isChangeStatusRequest(arg: any): boolean {
+export function isOccupyFreeRequest(arg: any): boolean {
   const { query, user } = arg;
   return (
     arg &&

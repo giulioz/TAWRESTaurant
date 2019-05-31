@@ -35,8 +35,9 @@ import { Socket } from "socket.io";
   // DEBUG
   io.on("connection", (socket: Socket) => {
     socket.emit("greeting", { user: socket.request.user });
-    console.log(socket.request.user);
+    //console.log(socket.request.user);
     socket.join("waiters");
+    io.to("waiters").emit("test", { ciao: "a te" });
   });
 
   server.listen(parseInt(process.env.SERVER_PORT), () => {
