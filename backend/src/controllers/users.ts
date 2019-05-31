@@ -22,7 +22,7 @@ const barmans: Route = {
   subRoutes: [
     {
       path: "/byId/:id/orders",
-      middleware: [addParams("id", "id")],
+      middlewares: [addParams("id", "id")],
       GET: {
         callback: (req, res) => {
           let id = req.urlParams.id;
@@ -34,11 +34,11 @@ const barmans: Route = {
     }
   ],
   GET: {
-    middleware: [setQueryRole(UserRole.Barman)],
+    middlewares: [setQueryRole(UserRole.Barman)],
     callback: getUsers
   },
   POST: {
-    middleware: [userHasRole([UserRole.Cashier]), setBodyRole(UserRole.Barman)],
+    middlewares: [userHasRole([UserRole.Cashier]), setBodyRole(UserRole.Barman)],
     callback: postUser
   }
 };
@@ -46,11 +46,11 @@ const barmans: Route = {
 const cashiers: Route = {
   path: "/cashiers",
   GET: {
-    middleware: [setQueryRole(UserRole.Cashier)],
+    middlewares: [setQueryRole(UserRole.Cashier)],
     callback: getUsers
   },
   POST: {
-    middleware: [
+    middlewares: [
       userHasRole([UserRole.Cashier]),
       setBodyRole(UserRole.Cashier)
     ],
@@ -63,7 +63,7 @@ const cooks: Route = {
   subRoutes: [
     {
       path: "/byId/:id/orders",
-      middleware: [addParams("id", "id")],
+      middlewares: [addParams("id", "id")],
       GET: {
         callback: (req, res) => {
           let id = req.urlParams.id;
@@ -75,11 +75,11 @@ const cooks: Route = {
     }
   ],
   GET: {
-    middleware: [setQueryRole(UserRole.Cook)],
+    middlewares: [setQueryRole(UserRole.Cook)],
     callback: getUsers
   },
   POST: {
-    middleware: [userHasRole([UserRole.Cashier]), setBodyRole(UserRole.Cook)],
+    middlewares: [userHasRole([UserRole.Cashier]), setBodyRole(UserRole.Cook)],
     callback: postUser
   }
 };
@@ -90,7 +90,7 @@ const waiters: Route = {
     {
       path: "/byId/:id/tables",
       GET: {
-        middleware: [addParams("id", "id")],
+        middlewares: [addParams("id", "id")],
         callback: (req, res) => {
           let id = req.urlParams.id;
           TableModel.find({ servedBy: id }).then(tables => {
@@ -101,29 +101,29 @@ const waiters: Route = {
     }
   ],
   GET: {
-    middleware: [setQueryRole(UserRole.Waiter)],
+    middlewares: [setQueryRole(UserRole.Waiter)],
     callback: getUsers
   },
   POST: {
-    middleware: [userHasRole([UserRole.Cashier]), setBodyRole(UserRole.Waiter)],
+    middlewares: [userHasRole([UserRole.Cashier]), setBodyRole(UserRole.Waiter)],
     callback: postUser
   }
 };
 
 const users: Route = {
   path: "/users",
-  middleware: [jwtAuth],
+  middlewares: [jwtAuth],
   subRoutes: [
     {
       path: "/byId/:id",
-      middleware: [addParams("id", "id")],
+      middlewares: [addParams("id", "id")],
       GET: { callback: getUserById },
       PUT: {
-        middleware: [userHasRole([UserRole.Cashier])],
+        middlewares: [userHasRole([UserRole.Cashier])],
         callback: putChangePassword
       },
       DELETE: {
-        middleware: [userHasRole([UserRole.Cashier])],
+        middlewares: [userHasRole([UserRole.Cashier])],
         callback: deleteUser
       }
     },
@@ -133,7 +133,7 @@ const users: Route = {
     waiters
   ],
   GET: { callback: getUsers },
-  POST: { middleware: [userHasRole([UserRole.Cashier])], callback: postUser }
+  POST: { middlewares: [userHasRole([UserRole.Cashier])], callback: postUser }
 };
 
 function getUsers(req, res, next) {

@@ -3,7 +3,9 @@
     <script src="http://localhost:3000/static/js/socket.io.js"></script>
     <script>
       const jwt =
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOnsiX2lkIjoiNWNlYzRkYjUzMzY0MDQyZGI5NTYzMWQxIiwidXNlcm5hbWUiOiJkZWNpbm8iLCJuYW1lIjoicGFwZXJvbiIsInN1cm5hbWUiOiJkZXBhcGVyb25pIiwicm9sZSI6IkNhc2hpZXIifSwiaWF0IjoxNTU4OTk2MjMzLCJleHAiOjE1NTkwMzk0MzN9.Tduv-ugnh0bx8k2M6x1u-nLsD-5hZV5Esm-LS8J_yQo";
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9" +
+        ".eyJfaWQiOiI1Y2VlYzcyNDE1ZWQzYzM0MDhlYzk1MzQiLCJ1c2VybmFtZSI6InF1b3ZhZG8iLCJuYW1lIjoiUXVvIiwic3VybmFtZSI6IlN0YXR1cyIsInJvbGUiOiJXYWl0ZXIiLCJpYXQiOjE1NTkzMjMyOTUsImV4cCI6MTU1OTM2NjQ5NX0" +
+        ".ReNYxgPesf9G8ubGuPr7OSVUZZPV4q6FWSBp6tyoDzs";
       const socket = io.connect("http://localhost:3000/", {
         path: "/api/v1/events",
         query: "auth_token=" + jwt
@@ -19,6 +21,10 @@
 
       socket.on("error", err => {
         console.error(err);
+      });
+
+      socket.on("test", data => {
+        console.log(data);
       });
     </script>
   </head>

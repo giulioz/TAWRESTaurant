@@ -10,6 +10,8 @@ import { TableStatus } from "../models/table";
 import { OrderStatus, OrderKind } from "../models/order";
 import { UserRole } from "../models/user";
 import { addParams } from "../middlewares/addParams";
+import { io } from "../server";
+import { Socket } from "socket.io";
 
 const tableFoodOrders: Route = {
   path: "/foodOrders",
@@ -28,7 +30,7 @@ export const tableByIdOrders: Route = {
   subRoutes: [
     {
       path: "/byId/:ido",
-      middleware: [addParams("ido")],
+      middlewares: [addParams("ido")],
       GET: { callback: getTableByIdOrderById },
       PUT: { callback: putTableByIdOrderById },
       DELETE: { callback: deleteTableByIdOrderById }
@@ -78,8 +80,9 @@ function putTableByIdChangeStatus(req, res, next) {
         .catch(err => {
           next(err);
         });
-
-      //TODO socket.io event notify barmans and cooks
+      let serverIo: Socket = io;
+      serverIo.to(UserRole.Barman).emit("orders are taken", table);
+      serverIo.to(UserRole.Cook).emit("orders are taken", table);
     })
     .catch(err => {
       return next(err);
@@ -116,7 +119,19 @@ function putTableByIdOrderById(req, res, next) {
     }
     order
       .save()
-      .then(() => res.json(order))
+      .then(() => {
+        let serverIo: Socket = io;
+        if (order.status === OrderStatus.Ready) {
+          serverIo.to(UserRole.Waiter).emit("order is ready", order);
+          OrderModel.countDocuments({
+            table: order.table,
+            status: { $not: OrderStatus.Ready }
+          }); //TODO
+        } else {
+          serverIo.to(req.user.role).emit("order is preparing", order);
+        }
+        res.json(order);
+      })
       .catch(err => next(err));
   });
 }

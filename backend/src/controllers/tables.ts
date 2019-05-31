@@ -14,27 +14,30 @@ import { isOrderStatus } from "../models/order";
 import { Route } from ".";
 import { addParams } from "../middlewares/addParams";
 import { tableByIdOrders as tableByIdOrdersRoute } from "./orders";
+import { io } from "../server";
+import { Socket } from "socket.io";
 
 export const tables: Route = {
   path: "/tables",
-  middleware: [jwtAuth],
+  middlewares: [jwtAuth],
   subRoutes: [
     {
       path: "/byId/:id",
-      middleware: [addParams("id", "id")],
+      middlewares: [addParams("id")],
       subRoutes: [tableByIdOrdersRoute],
       GET: { callback: getTableById },
-      PUT: {
-        callback: changeStatus
-      },
+      PUT: { callback: changeStatus },
       DELETE: {
-        middleware: [userHasRole([UserRole.Cashier])],
+        middlewares: [userHasRole([UserRole.Cashier])],
         callback: deleteTable
       }
     }
   ],
   GET: { callback: getTables },
-  POST: { middleware: [userHasRole([UserRole.Cashier])], callback: createTable }
+  POST: {
+    middlewares: [userHasRole([UserRole.Cashier])],
+    callback: createTable
+  }
 };
 
 function getTables(req, res, next) {
@@ -126,6 +129,15 @@ function changeStatus(req, res, next) {
       table
         .save()
         .then(() => {
+          let serverIo: Socket = io;
+          serverIo.emit("test", { ciao: "a te" });
+          if (table.status === TableStatus.NotServed) {
+            serverIo.to(UserRole.Cashier).emit("table is occupied", table);
+            serverIo.to(UserRole.Waiter).emit("table is occupied", table);
+          } else {
+            serverIo.to(UserRole.Cashier).emit("table is free", table);
+            serverIo.to(UserRole.Waiter).emit("table is free", table);
+          }
           return res.send();
         })
         .catch(err => {

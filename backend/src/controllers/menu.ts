@@ -9,27 +9,29 @@ import {
 import { MenuItem, isMenuItemKind } from "../models/menuItem";
 import { Route } from ".";
 import { addParams } from "../middlewares/addParams";
+import { jwtAuth } from "../middlewares/jwtAuth";
 
 export const menu: Route = {
   path: "/menu",
+  middlewares: [jwtAuth],
   subRoutes: [
     {
       path: "/byId/:id",
-      middleware: [addParams("id")],
+      middlewares: [addParams("id")],
       GET: { callback: getMenuItemById },
       DELETE: {
-        middleware: [userHasRole([UserRole.Cashier])],
+        middlewares: [userHasRole([UserRole.Cashier])],
         callback: deleteMenuItem
       }
     }
   ],
   GET: { callback: getMenuItems },
   POST: {
-    middleware: [userHasRole([UserRole.Cashier])],
+    middlewares: [userHasRole([UserRole.Cashier])],
     callback: postMenuItem
   },
   PUT: {
-    middleware: [userHasRole([UserRole.Cashier])],
+    middlewares: [userHasRole([UserRole.Cashier])],
     callback: putMenuItem
   }
 };

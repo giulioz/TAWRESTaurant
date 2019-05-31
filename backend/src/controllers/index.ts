@@ -8,13 +8,13 @@ import { tables as tablesRoute } from "./tables";
 import { menu as menuRoute } from "./menu";
 
 export type METHOD = {
-  middleware?: Array<RequestHandler>;
+  middlewares?: Array<RequestHandler>;
   callback: RequestHandlerParams;
 };
 
 export type Route = {
   path: string;
-  middleware?: Array<RequestHandler>;
+  middlewares?: Array<RequestHandler>;
   subRoutes?: Array<Route>;
   GET?: METHOD;
   POST?: METHOD;
@@ -27,27 +27,28 @@ function autoNext(req, res, next) {
 }
 
 export function createRouter(route: Route): Router {
-  const { path, middleware, subRoutes, GET, POST, PUT, DELETE } = route;
+  const { path, middlewares, subRoutes, GET, POST, PUT, DELETE } = route;
   let router: Router = express.Router();
-  if (middleware) router.use(path, middleware);
+  if (middlewares) router.use(path, middlewares);
+
   if (GET) {
-    if (!GET.middleware) GET.middleware = [autoNext];
-    router.get(path, GET.middleware, GET.callback);
+    if (!GET.middlewares) GET.middlewares = [autoNext];
+    router.get(path, GET.middlewares, GET.callback);
   }
 
   if (POST) {
-    if (!POST.middleware) POST.middleware = [autoNext];
-    router.post(path, POST.middleware, POST.callback);
+    if (!POST.middlewares) POST.middlewares = [autoNext];
+    router.post(path, POST.middlewares, POST.callback);
   }
 
   if (PUT) {
-    if (!PUT.middleware) PUT.middleware = [autoNext];
-    router.put(path, PUT.middleware, PUT.callback);
+    if (!PUT.middlewares) PUT.middlewares = [autoNext];
+    router.put(path, PUT.middlewares, PUT.callback);
   }
 
   if (DELETE) {
-    if (!DELETE.middleware) DELETE.middleware = [autoNext];
-    router.delete(path, DELETE.middleware, DELETE.callback);
+    if (!DELETE.middlewares) DELETE.middlewares = [autoNext];
+    router.delete(path, DELETE.middlewares, DELETE.callback);
   }
 
   if (subRoutes)
@@ -59,7 +60,7 @@ export function createRouter(route: Route): Router {
 
 const apiv1: Route = {
   path: "/api/v1",
-  middleware: [bodyParser.json()],
+  middlewares: [bodyParser.json()],
   subRoutes: [loginRoute, usersRoute, tablesRoute, menuRoute],
   GET: {
     callback: (req, res) => {

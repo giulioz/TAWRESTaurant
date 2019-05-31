@@ -22,5 +22,5 @@ function signToken(req, res) {
 
 export const login: Route = {
   path: "/login",
-  POST: { middleware: [basicAuth], callback: signToken }
+  POST: { middlewares: [basicAuth], callback: signToken }
 };
