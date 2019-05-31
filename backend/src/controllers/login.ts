@@ -1,7 +1,7 @@
 import express = require("express");
 import jsonwebtoken = require("jsonwebtoken");
 import { basicAuth } from "../middlewares/basicAuth";
-import { Endpoint } from "./RESTaurantAPI";
+import { Route } from "./RESTaurantAPI";
 
 const router = express.Router();
 
@@ -25,8 +25,7 @@ function signToken(req, res) {
 
 export default router;
 
-export const login: Endpoint = {
-  route: "/login",
-  middlewares: [basicAuth],
-  POST: { callback: signToken }
+export const login: Route = {
+  path: "/login",
+  POST: { middleware: [basicAuth], callback: signToken }
 };

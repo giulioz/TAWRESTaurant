@@ -14,85 +14,168 @@ import {
 } from "../models";
 import { UserRole, isUserRole, User } from "../models/user";
 import { isCreateUserForm, isChangePasswordForm } from "../models/forms/user";
+import { Route } from "./RESTaurantAPI";
+import { addParams } from "../middlewares/addParams";
 
-const router = express.Router();
+const barmans: Route = {
+  path: "/barmans",
+  subRoutes: [
+    {
+      path: "/byId/:id/orders",
+      middleware: [addParams("id", "id")],
+      GET: {
+        callback: (req, res) => {
+          let id = req.urlParams.id;
+          BeverageOrderModel.find({ barman: id }).then(orders => {
+            res.json(orders);
+          });
+        }
+      }
+    }
+  ],
+  GET: {
+    middleware: [
+      (req, res, next) => {
+        req.query.role = UserRole.Barman;
+        next();
+      }
+    ],
+    callback: getUsers
+  },
+  POST: {
+    middleware: [
+      userHasRole([UserRole.Cashier]),
+      (req, res, next) => {
+        req.body.role = UserRole.Barman;
+        next();
+      }
+    ],
+    callback: createUser
+  }
+};
 
-router.use(jwtAuth);
+const cashiers: Route = {
+  path: "/cashiers",
+  GET: {
+    middleware: [
+      (req, res, next) => {
+        req.query.role = UserRole.Cashier;
+        next();
+      }
+    ],
+    callback: getUsers
+  },
+  POST: {
+    middleware: [
+      userHasRole([UserRole.Cashier]),
+      (req, res, next) => {
+        req.body.role = UserRole.Cashier;
+        next();
+      }
+    ],
+    callback: createUser
+  }
+};
 
-router.get("/", getUsers);
+const cooks: Route = {
+  path: "/cooks",
+  subRoutes: [
+    {
+      path: "/byId/:id/orders",
+      middleware: [addParams("id", "id")],
+      GET: {
+        callback: (req, res) => {
+          let id = req.urlParams.id;
+          FoodOrderModel.find({ cook: id }).then(orders => {
+            res.json(orders);
+          });
+        }
+      }
+    }
+  ],
+  GET: {
+    middleware: [
+      (req, res, next) => {
+        req.query.role = UserRole.Cook;
+        next();
+      }
+    ],
+    callback: getUsers
+  },
+  POST: {
+    middleware: [
+      userHasRole([UserRole.Cashier]),
+      (req, res, next) => {
+        req.body.role = UserRole.Cook;
+        next();
+      }
+    ],
+    callback: createUser
+  }
+};
 
-router
-  .route("/barmans")
-  .get((req, res, next) => {
-    req.query = { role: UserRole.Barman };
-    next();
-  }, getUsers)
-  .post(userHasRole([UserRole.Cashier]), (req, res, next) => {
-    req.body.role = UserRole.Barman;
-    next();
-  });
+const waiters: Route = {
+  path: "/waiters",
+  subRoutes: [
+    {
+      path: "/byId/:id/orders",
+      GET: {
+        middleware: [addParams("id", "id")],
+        callback: (req, res) => {
+          let id = req.urlParams.id;
+          TableModel.find({ servedBy: id }).then(tables => {
+            res.json(tables);
+          });
+        }
+      }
+    }
+  ],
+  GET: {
+    middleware: [
+      (req, res, next) => {
+        req.query.role = UserRole.Waiter;
+        next();
+      }
+    ],
+    callback: getUsers
+  },
+  POST: {
+    middleware: [
+      userHasRole([UserRole.Cashier]),
+      (req, res, next) => {
+        req.body.role = UserRole.Waiter;
+        next();
+      }
+    ],
+    callback: createUser
+  }
+};
 
-router
-  .route("/cashiers")
-  .get((req, res, next) => {
-    req.query = { role: UserRole.Cashier };
-    next();
-  }, getUsers)
-  .post(userHasRole([UserRole.Cashier]), (req, res, next) => {
-    req.body.role = UserRole.Cashier;
-    next();
-  });
-
-router
-  .route("/cooks")
-  .get((req, res, next) => {
-    req.query = { role: UserRole.Cook };
-    next();
-  }, getUsers)
-  .post(userHasRole([UserRole.Cashier]), (req, res, next) => {
-    req.body.role = UserRole.Cook;
-    next();
-  });
-
-router.get("/cooks/byId/:id/orders", (req, res) => {
-  let id = req.params.id;
-  FoodOrderModel.find({ cook: id }).then(orders => {
-    res.json(orders);
-  });
-});
-
-router
-  .route("/waiters")
-  .get((req, res, next) => {
-    req.query = { role: UserRole.Waiter };
-    next();
-  }, getUsers)
-  .post(userHasRole([UserRole.Cashier]), (req, res, next) => {
-    req.body.role = UserRole.Waiter;
-    next();
-  });
-
-router.get("/waiters/byId/:id/tables", (req, res) => {
-  let id = req.params.id;
-  TableModel.find({ servedBy: id }).then(tables => {
-    res.json(tables);
-  });
-});
-
-router.get("/barmans/byId/:id/orders", (req, res) => {
-  let id = req.params.id;
-  BeverageOrderModel.find({ barman: id }).then(orders => {
-    res.json(orders);
-  });
-});
-
-router.get("/:id", getUserById);
-
-router.post("/", userHasRole([UserRole.Cashier]), createUser);
-
-router.put("/:id/password", userHasRole([UserRole.Cashier]), changePassword);
-
-router.delete("/:id", userHasRole([UserRole.Cashier]), deleteUser);
+const users: Route = {
+  path: "/users",
+  middleware: [jwtAuth],
+  subRoutes: [
+    {
+      path: "/byId/:id",
+      middleware: [addParams("id", "id")],
+      GET: { callback: getUserById },
+      PUT: {
+        middleware: [userHasRole([UserRole.Cashier])],
+        callback: changePassword
+      },
+      DELETE: {
+        middleware: [userHasRole([UserRole.Cashier])],
+        callback: deleteUser
+      }
+    },
+    barmans,
+    cashiers,
+    cooks,
+    waiters
+  ],
+  GET: { callback: getUsers },
+  POST: { middleware: [userHasRole([UserRole.Cashier])], callback: createUser }
+};
 
 export function getUsers(req, res, next) {
   const filter = {};
@@ -108,8 +191,8 @@ export function getUsers(req, res, next) {
     });
 }
 
-export function getUserById(req, res, next) {
-  UserModel.findOne({ _id: req.params.id })
+function getUserById(req, res, next) {
+  UserModel.findOne({ _id: req.urlParams.id })
     .then(user => {
       if (!user) {
         return res.status(404).json(error("User not found"));
@@ -121,7 +204,7 @@ export function getUserById(req, res, next) {
     });
 }
 
-export function createUser(req, res, next) {
+function createUser(req, res, next) {
   if (!isCreateUserForm(req.body)) {
     return res.status(400).json(error("Bad request"));
   }
@@ -152,12 +235,12 @@ export function createUser(req, res, next) {
     });
 }
 
-export function changePassword(req, res, next) {
+function changePassword(req, res, next) {
   if (!isChangePasswordForm(req.body)) {
     return res.status(400).json(error("Bad request"));
   }
 
-  UserModel.findById(req.params.id)
+  UserModel.findById(req.urlParams.id)
     .then(user => {
       if (!user) {
         return res.status(404).json(error("User not found"));
@@ -177,13 +260,13 @@ export function changePassword(req, res, next) {
     });
 }
 
-export function deleteUser(req, res, next) {
-  UserModel.findById(req.params.id)
+function deleteUser(req, res, next) {
+  UserModel.findById(req.urlParams.id)
     .then(user => {
       if (!user) {
         return res.status(404).json(error("User not found"));
       }
-      UserModel.deleteOne({ _id: req.params.id })
+      UserModel.deleteOne({ _id: req.urlParams.id })
         .then(() => {
           return res.send();
         })
@@ -196,4 +279,4 @@ export function deleteUser(req, res, next) {
     });
 }
 
-export default router;
+export default users;

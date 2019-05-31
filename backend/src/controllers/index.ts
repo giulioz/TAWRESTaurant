@@ -35,11 +35,11 @@ const routes = [
 
 const router = express.Router();
 
-routes.forEach(route => {
+/*routes.forEach(route => {
   if (route.enabled) {
     router.use(route.path, route.router);
   }
-});
+});*/
 
 router.get("/", (req, res, next) => {
   return res.json({

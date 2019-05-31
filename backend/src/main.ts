@@ -27,7 +27,7 @@ import { createRouter, root } from "./controllers/RESTaurantAPI";
   app.use("/api/v1", apiRouter);
   */
 
-  app.use(createRouter(root));
+  app.use(bodyParser.json(), createRouter(root));
 
   // Error handling middleware
   app.use((err, req, res, next) => {
