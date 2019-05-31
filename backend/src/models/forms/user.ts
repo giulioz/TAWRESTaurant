@@ -29,5 +29,5 @@ export type ChangePasswordForm = {
 };
 
 export function isChangePasswordForm(arg: any): arg is ChangePasswordForm {
-  return arg && arg.password && arg.password === "string";
+  return arg && arg.password && typeof arg.password === "string";
 }
