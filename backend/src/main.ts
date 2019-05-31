@@ -1,15 +1,11 @@
 require("./config");
-
 import mongoose = require("mongoose");
 import express = require("express");
 import bodyParser = require("body-parser");
-
 import { app, server, io } from "./server";
-
-import apiRouter from "./controllers";
 import { ioJwtAuth } from "./middlewares/ioJwtAuth";
 import { error } from "./helpers/error";
-import { addParams } from "./middlewares/addParams";
+import { createRouter, root } from "./controllers";
 
 (async () => {
   await mongoose.connect(process.env.MONGODB_URL, {
@@ -17,17 +13,11 @@ import { addParams } from "./middlewares/addParams";
   });
   console.log("Connected to MongoDB");
 
-  app.all("/:id", addParams("id", "id"));
-  app.all("/:id", (req, res, next) => {
-    console.log(req.urlParams.id);
-  });
-
-  // DEBUG
   app.use("/static", express.static("public"));
 
   app.use(bodyParser.json());
 
-  app.use("/api/v1", apiRouter);
+  app.use(createRouter(root));
 
   // Error handling middleware
   app.use((err, req, res, next) => {

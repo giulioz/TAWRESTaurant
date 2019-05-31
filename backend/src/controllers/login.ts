@@ -1,10 +1,7 @@
 import express = require("express");
 import jsonwebtoken = require("jsonwebtoken");
 import { basicAuth } from "../middlewares/basicAuth";
-
-const router = express.Router();
-
-router.post("/", basicAuth, signToken);
+import { Route } from ".";
 
 function signToken(req, res) {
   const data = {
@@ -22,4 +19,8 @@ function signToken(req, res) {
   return res.json({ token: token });
 }
 
-export default router;
+
+export const login: Route = {
+  path: "/login",
+  POST: { middleware: [basicAuth], callback: signToken }
+};
