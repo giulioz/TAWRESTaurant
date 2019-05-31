@@ -38,7 +38,10 @@ const barmans: Route = {
     callback: getUsers
   },
   POST: {
-    middlewares: [userHasRole([UserRole.Cashier]), setBodyRole(UserRole.Barman)],
+    middlewares: [
+      userHasRole([UserRole.Cashier]),
+      setBodyRole(UserRole.Barman)
+    ],
     callback: postUser
   }
 };
@@ -105,7 +108,10 @@ const waiters: Route = {
     callback: getUsers
   },
   POST: {
-    middlewares: [userHasRole([UserRole.Cashier]), setBodyRole(UserRole.Waiter)],
+    middlewares: [
+      userHasRole([UserRole.Cashier]),
+      setBodyRole(UserRole.Waiter)
+    ],
     callback: postUser
   }
 };
@@ -117,11 +123,16 @@ const users: Route = {
     {
       path: "/byId/:id",
       middlewares: [addParams("id", "id")],
+      subRoutes: [
+        {
+          path: "/password",
+          PUT: {
+            middlewares: [userHasRole([UserRole.Cashier])],
+            callback: putChangePassword
+          }
+        }
+      ],
       GET: { callback: getUserById },
-      PUT: {
-        middlewares: [userHasRole([UserRole.Cashier])],
-        callback: putChangePassword
-      },
       DELETE: {
         middlewares: [userHasRole([UserRole.Cashier])],
         callback: deleteUser
