@@ -3,10 +3,6 @@ import jsonwebtoken = require("jsonwebtoken");
 import { basicAuth } from "../middlewares/basicAuth";
 import { Route } from "./RESTaurantAPI";
 
-const router = express.Router();
-
-router.post("/", basicAuth, signToken);
-
 function signToken(req, res) {
   const data = {
     _id: req.user._id,
@@ -23,7 +19,6 @@ function signToken(req, res) {
   return res.json({ token: token });
 }
 
-export default router;
 
 export const login: Route = {
   path: "/login",

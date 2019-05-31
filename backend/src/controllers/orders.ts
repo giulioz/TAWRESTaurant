@@ -1,163 +1,244 @@
-import express = require("express");
-import { jwtAuth } from "../middlewares/jwtAuth";
-import { userHasRole } from "../middlewares/userHasRole";
-import { error } from "../helpers/error";
-import { UserRole } from "../models/user";
-import { TableModel, BeverageOrderModel, FoodOrderModel } from "../models";
-import { Table } from "../models/table";
+import { Route } from "./RESTaurantAPI";
 import {
-  OrderKind,
-  Order,
-  isOrderKind,
-  isOrderStatus,
-  orderSchema
-} from "../models/order";
-import { isCreateOrderForm } from "../models/forms/order";
-import { Types } from "mongoose";
+  TableModel,
+  OrderModel,
+  FoodOrderModel,
+  BeverageOrderModel
+} from "../models";
+import { error } from "../helpers/error";
+import { TableStatus } from "../models/table";
+import { OrderStatus, OrderKind } from "../models/order";
+import { UserRole } from "../models/user";
+import { addParams } from "../middlewares/addParams";
 
-const router = express.Router();
+const tableFoodOrders: Route = {
+  path: "/foodOrders",
+  GET: { callback: getTableByIdFoodOrders },
+  POST: { callback: postTableByIdFoodOrders }
+};
 
-router.use(jwtAuth);
+const tableBeverageOrders: Route = {
+  path: "/beverageOrders",
+  GET: { callback: getTableByIdBeverageOrders },
+  POST: { callback: postTableByIdBeverageOrders }
+};
 
-router.get("/tables/:id/orders", getTableOrders);
+export const tableByIdOrders: Route = {
+  path: "/orders",
+  subRoutes: [
+    {
+      path: "/byId/:ido",
+      middleware: [addParams("ido")],
+      GET: { callback: getTableByIdOrderById },
+      PUT: { callback: putTableByIdOrderById },
+      DELETE: { callback: deleteTableByIdOrderById }
+    },
+    tableFoodOrders,
+    tableBeverageOrders
+  ],
+  GET: { callback: getTableByIdOrders },
+  PUT: { callback: putTableByIdChangeStatus }
+};
 
-router.get("/orders", getAllOrders);
-
-router.get("/tables/:id/orders/:ido", getOrderById);
-
-router.post("/tables/:id/orders", userHasRole([UserRole.Waiter]), createOrder);
-
-router.put(
-  "/tables/:id/orders/:ido",
-  userHasRole([UserRole.Cook, UserRole.Barman]),
-  changeStatus
-);
-
-router.delete(
-  "/tables/:id/orders/:ido",
-  userHasRole([UserRole.Cashier]),
-  deleteOrder
-);
-
-function getTableOrders(req, res, next) {
-  TableModel.findOne({ _id: req.params.id })
-    .populate({ path: "orders.food orders.beverage" })
-    .then((table: Table) => {
-      if (!table) return res.status(404).json(error("Table not found"));
-
-      const { kind, status } = req.query;
-
+function getTableByIdOrders(req, res, next) {
+  TableModel.findOne({ _id: req.urlParams.id })
+    .populate("orders")
+    .then(table => {
+      if (!table) {
+        return res.status(404).json(error("Table not found"));
+      }
+      console.log(table.orders);
       return res.json(
-        table.orders.map((val: Order) => {
-          if (
-            (!isOrderKind(kind) || kind === val.kind) &&
-            (!isOrderStatus(status) || status === val.status)
-          )
-            return val;
+        table.orders.filter(order => {
+          if (!req.query.status || order.status === req.query.status)
+            return true;
+          return false;
         })
       );
+    })
+    .catch(err => {
+      return next(err);
     });
 }
 
-function getAllOrders(req, res, next) {
-  const { kind, status } = req.query;
-  TableModel.aggregate([
-    { $unwind: "$orders" },
-    {
-      $project: {
-        _id: "$orders._id",
-        status: "$orders.status",
-        kind: "$orders.kind",
-        food: { $ifNull: ["$orders.food", "$$REMOVE"] },
-        beverage: { $ifNull: ["$orders.beverage", "$$REMOVE"] },
-        cook: { $ifNull: ["$orders.cook", "$$REMOVE"] },
-        barman: { $ifNull: ["$orders.barman", "$$REMOVE"] },
-        table: "$_id"
+function putTableByIdChangeStatus(req, res, next) {
+  TableModel.findOne({ _id: req.urlParams.id })
+    .then(table => {
+      if (!table) {
+        return res.status(404).json(error("Table not found"));
       }
-    },
-    {
-      $lookup: {
-        from: "menuitems", //casesensitive
-        localField: "food",
-        foreignField: "_id",
-        as: "food"
-      }
-    },
-    {
-      $lookup: {
-        from: "menuitems", //casesensitive
-        localField: "beverage",
-        foreignField: "_id",
-        as: "beverage"
-      }
-    },
-    { $unwind: { path: "$food", preserveNullAndEmptyArrays: true } },
-    { $unwind: { path: "$beverage", preserveNullAndEmptyArrays: true } }
-  ]).exec((err, orders) => {
-    if (err) return next(err);
-    console.log(orders);
-    return res.json(
-      orders.map((val: Order) => {
-        if (
-          (!isOrderKind(kind) || kind === val.kind) &&
-          (!isOrderStatus(status) || status === val.status)
-        )
-          return val;
-      })
-    );
-  });
+      if (table.orders.length == 0)
+        return res.status(404).json(error("Orders not found"));
+      table.status = TableStatus.Waiting;
+      table.ordersTakenAt = new Date();
+      table
+        .save()
+        .then(() => {
+          return res.json(table);
+        })
+        .catch(err => {
+          next(err);
+        });
+
+      //TODO socket.io event notify barmans and cooks
+    })
+    .catch(err => {
+      return next(err);
+    });
 }
 
-function getOrderById(req, res, next) {
-  /*TableModel.findOne({ _id: req.params.id })
-    .populate({ path: "orders.food orders.beverage" })
-    .then((table: Table) => {
-      if (!table) return res.status(404).json(error("Table not found"));
-      var order = table.orders.id(req.params.ido);
+function getTableByIdOrderById(req, res) {
+  OrderModel.findOne({ _id: req.urlParams.ido, table: req.urlParams.id }).then(
+    order => {
       if (!order) return res.status(404).json(error("Order not found"));
       return res.json(order);
-    });*/
+    }
+  );
 }
 
-function createOrder(req, res, next) {
-  TableModel.findOne({ _id: req.params.id }).then((table: Table) => {
-    if (!table) return res.status(404).json(error("Table not found"));
-    if (!isCreateOrderForm(req.body))
-      return res.status(400).json(error("Bad request"));
-
-    const { kind: oKind, beverage: oBeverage, food: oFood } = req.body;
-    let order: Order;
-    switch (oKind) {
-      case OrderKind.BeverageOrder:
-        order = new BeverageOrderModel({ kind: oKind, beverage: oBeverage });
-        break;
-      case OrderKind.FoodOrder:
-        order = new FoodOrderModel({ kind: oKind, food: oFood });
-        break;
+function putTableByIdOrderById(req, res, next) {
+  OrderModel.findOne({
+    _id: req.urlParams.ido,
+    table: req.urlParams.id
+  }).then((order: any) => {
+    if (!order) return res.status(404).json(error("Order not found"));
+    if (req.query.action === "assign") {
+      order.status = OrderStatus.Preparing;
+      if (req.user.role === UserRole.Cook && order.kind === OrderKind.FoodOrder)
+        order.cook = req.user._id;
+      if (
+        req.user.role === UserRole.Barman &&
+        order.kind === OrderKind.BeverageOrder
+      )
+        order.barman = req.user._id;
     }
-    table.orders.push(order);
-    table
+    if (req.query.action === "notify") {
+      order.status = OrderStatus.Ready;
+    }
+    order
       .save()
-      .then(() => res.send())
+      .then(() => res.json(order))
       .catch(err => next(err));
   });
 }
 
-function changeStatus(req, res, next) {}
-
-function deleteOrder(req, res, next) {
-  /*TableModel.findOne({ _id: req.params.id }).then((table: Table) => {
-    if (!table) return res.status(404).json(error("Table not found"));
-    var order = table.orders.id(req.params.ido);
-    if (!order) return res.status(404).json(error("Order not found"));
-    order.remove();
-    table
-      .save()
-      .then(() => {
-        return res.send();
-      })
-      .catch(err => next(err));
-  });*/
+function deleteTableByIdOrderById(req, res, next) {
+  OrderModel.count({
+    _id: req.urlParams.ido,
+    table: req.urlParams.id
+  }).then(count => {
+    if (count > 0)
+      OrderModel.deleteOne({ _id: req.urlParams.ido })
+        .then(() => {
+          res.send();
+        })
+        .catch(err => next(err));
+    else res.status(404).json(error("Order not found"));
+  });
 }
 
-export default router;
+function getTableByIdFoodOrders(req, res, next) {
+  TableModel.findOne({ _id: req.urlParams.id })
+    .populate("orders")
+    .then(table => {
+      if (!table) {
+        return res.status(404).json(error("Table not found"));
+      }
+      return res.json(
+        table.orders.filter(order => {
+          if (
+            (!req.query.status || order.status === req.query.status) &&
+            order.kind === OrderKind.FoodOrder
+          )
+            return true;
+          return false;
+        })
+      );
+    })
+    .catch(err => {
+      return next(err);
+    });
+}
+
+function postTableByIdFoodOrders(req, res, next) {
+  TableModel.findOne({ _id: req.urlParams.id })
+    .then(table => {
+      if (!table) {
+        return res.status(404).json(error("Table not found"));
+      }
+      req.body.table = table._id;
+      req.body.kind = OrderKind.FoodOrder;
+      let order = new FoodOrderModel(req.body);
+      order.save().then(() => {
+        table.orders.push(order._id);
+        table
+          .save()
+          .then(() => {
+            return res.json(order);
+          })
+          .catch(err => {
+            OrderModel.deleteOne({ _id: order.id })
+              .then(() => {
+                next(err);
+              })
+              .catch(err => next(err));
+          });
+      });
+    })
+    .catch(err => {
+      return next(err);
+    });
+}
+
+function getTableByIdBeverageOrders(req, res, next) {
+  TableModel.findOne({ _id: req.urlParams.id })
+    .populate("orders")
+    .then(table => {
+      if (!table) {
+        return res.status(404).json(error("Table not found"));
+      }
+      return res.json(
+        table.orders.filter(order => {
+          if (
+            (!req.query.status || order.status === req.query.status) &&
+            order.kind === OrderKind.BeverageOrder
+          )
+            return true;
+          return false;
+        })
+      );
+    })
+    .catch(err => {
+      return next(err);
+    });
+}
+
+function postTableByIdBeverageOrders(req, res, next) {
+  TableModel.findOne({ _id: req.urlParams.id })
+    .then(table => {
+      if (!table) {
+        return res.status(404).json(error("Table not found"));
+      }
+      req.body.table = table._id;
+      req.body.kind = OrderKind.BeverageOrder;
+      let order = new BeverageOrderModel(req.body);
+      order.save().then(() => {
+        table.orders.push(order._id);
+        table
+          .save()
+          .then(() => {
+            return res.json(order);
+          })
+          .catch(err => {
+            OrderModel.deleteOne({ _id: order.id })
+              .then(() => {
+                next(err);
+              })
+              .catch(err => next(err));
+          });
+      });
+    })
+    .catch(err => {
+      return next(err);
+    });
+}

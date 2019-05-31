@@ -1,9 +1,11 @@
 const express = require("express");
-import users, { getUsers } from "./users";
-import { login } from "./login";
 import { Router, RequestHandler } from "express";
 import { RequestHandlerParams } from "express-serve-static-core";
 import bodyParser = require("body-parser");
+import { login as loginRoute } from "./login";
+import usersRoute from "./users";
+import { tables as tablesRoute } from "./tables";
+import { menu as menuRoute } from "./menu";
 
 export type METHOD = {
   middleware?: Array<RequestHandler>;
@@ -20,7 +22,7 @@ export type Route = {
   DELETE?: METHOD;
 };
 
-function pass(req, res, next) {
+function autoNext(req, res, next) {
   next();
 }
 
@@ -29,22 +31,22 @@ export function createRouter(route: Route): Router {
   let router: Router = express.Router();
   if (middleware) router.use(path, middleware);
   if (GET) {
-    if (!GET.middleware) GET.middleware = [pass];
+    if (!GET.middleware) GET.middleware = [autoNext];
     router.get(path, GET.middleware, GET.callback);
   }
 
   if (POST) {
-    if (!POST.middleware) POST.middleware = [pass];
+    if (!POST.middleware) POST.middleware = [autoNext];
     router.post(path, POST.middleware, POST.callback);
   }
 
   if (PUT) {
-    if (!PUT.middleware) PUT.middleware = [pass];
+    if (!PUT.middleware) PUT.middleware = [autoNext];
     router.put(path, PUT.middleware, PUT.callback);
   }
 
   if (DELETE) {
-    if (!DELETE.middleware) DELETE.middleware = [pass];
+    if (!DELETE.middleware) DELETE.middleware = [autoNext];
     router.delete(path, DELETE.middleware, DELETE.callback);
   }
 
@@ -58,7 +60,7 @@ export function createRouter(route: Route): Router {
 const apiv1: Route = {
   path: "/api/v1",
   middleware: [bodyParser.json()],
-  subRoutes: [login, users],
+  subRoutes: [loginRoute, usersRoute, tablesRoute, menuRoute],
   GET: {
     callback: (req, res) => {
       res.send("API V1");
@@ -76,13 +78,13 @@ export const root: Route = {
   }
 };
 
-export const routes = {
+const routes = {
   "/": {
     GET: { res: "subRoutes" }
   },
   "/users": {
     "/": {
-      GET: { guard: ["middleware"], callback: getUsers }
+      GET: { res: "Array<User>" }
     },
     "/byId/:id": {
       "/": {

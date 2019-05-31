@@ -1,4 +1,4 @@
-import express = require("express");
+/*import express = require("express");
 import loginRouter from "./login";
 import usersRouter from "./users";
 import menuRouter from "./menu";
@@ -35,11 +35,11 @@ const routes = [
 
 const router = express.Router();
 
-/*routes.forEach(route => {
+routes.forEach(route => {
   if (route.enabled) {
     router.use(route.path, route.router);
   }
-});*/
+});
 
 router.get("/", (req, res, next) => {
   return res.json({
@@ -50,3 +50,4 @@ router.get("/", (req, res, next) => {
 });
 
 export default router;
+*/

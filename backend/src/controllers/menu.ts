@@ -1,5 +1,3 @@
-import express = require("express");
-import { jwtAuth } from "../middlewares/jwtAuth";
 import { userHasRole } from "../middlewares/userHasRole";
 import { error } from "../helpers/error";
 import { MenuItemModel } from "../models";
@@ -9,20 +7,32 @@ import {
   isChangeMenuItemForm
 } from "../models/forms/menuItem";
 import { MenuItem, isMenuItemKind } from "../models/menuItem";
+import { Route } from "./RESTaurantAPI";
+import { addParams } from "../middlewares/addParams";
 
-const router = express.Router();
-
-router.use(jwtAuth);
-
-router.get("/", getMenuItems);
-
-router.get("/:id", getMenuItemById);
-
-router.post("/", userHasRole([UserRole.Cashier]), createMenuItem);
-
-//router.put("/:id", userHasRole([UserRole.Cashier]), changeMenuItem);
-
-router.delete("/:id", userHasRole([UserRole.Cashier]), deleteMenuItem);
+export const menu: Route = {
+  path: "/menu",
+  subRoutes: [
+    {
+      path: "/byId/:id",
+      middleware: [addParams("id")],
+      GET: { callback: getMenuItemById },
+      DELETE: {
+        middleware: [userHasRole([UserRole.Cashier])],
+        callback: deleteMenuItem
+      }
+    }
+  ],
+  GET: { callback: getMenuItems },
+  POST: {
+    middleware: [userHasRole([UserRole.Cashier])],
+    callback: postMenuItem
+  },
+  PUT: {
+    middleware: [userHasRole([UserRole.Cashier])],
+    callback: putMenuItem
+  }
+};
 
 function getMenuItems(req, res, next) {
   const { name, price, preparationTime, kind } = req.query;
@@ -62,7 +72,7 @@ function getMenuItemById(req, res, next) {
     });
 }
 
-function createMenuItem(req, res, next) {
+function postMenuItem(req, res, next) {
   if (!isCreateMenuItemForm(req.body)) {
     console.log(req.body);
     return res.status(400).json(error("Bad request"));
@@ -79,11 +89,10 @@ function createMenuItem(req, res, next) {
     });
 }
 
-function changeMenuItem(req, res, next) {
+function putMenuItem(req, res, next) {
   if (!isChangeMenuItemForm(req.body)) {
     return res.status(400).json(error("Bad request"));
   }
-
   MenuItemModel.findOne({ _id: req.params.id })
     .then((menuItem: MenuItem) => {
       if (!menuItem) {
@@ -94,7 +103,6 @@ function changeMenuItem(req, res, next) {
       if (price) menuItem.price = price;
       if (preparationTime) menuItem.preparationTime = preparationTime;
       if (kind) menuItem.kind = kind;
-
       menuItem
         .save()
         .then(() => {
@@ -127,5 +135,3 @@ function deleteMenuItem(req, res, next) {
       return next(err);
     });
 }
-
-export default router;

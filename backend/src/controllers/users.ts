@@ -1,4 +1,3 @@
-import express = require("express");
 import { jwtAuth } from "../middlewares/jwtAuth";
 import { userHasRole } from "../middlewares/userHasRole";
 import { error } from "../helpers/error";
@@ -16,6 +15,7 @@ import { UserRole, isUserRole, User } from "../models/user";
 import { isCreateUserForm, isChangePasswordForm } from "../models/forms/user";
 import { Route } from "./RESTaurantAPI";
 import { addParams } from "../middlewares/addParams";
+import { setQueryRole, setBodyRole } from "../middlewares/setRole";
 
 const barmans: Route = {
   path: "/barmans",
@@ -34,46 +34,27 @@ const barmans: Route = {
     }
   ],
   GET: {
-    middleware: [
-      (req, res, next) => {
-        req.query.role = UserRole.Barman;
-        next();
-      }
-    ],
+    middleware: [setQueryRole(UserRole.Barman)],
     callback: getUsers
   },
   POST: {
-    middleware: [
-      userHasRole([UserRole.Cashier]),
-      (req, res, next) => {
-        req.body.role = UserRole.Barman;
-        next();
-      }
-    ],
-    callback: createUser
+    middleware: [userHasRole([UserRole.Cashier]), setBodyRole(UserRole.Barman)],
+    callback: postUser
   }
 };
 
 const cashiers: Route = {
   path: "/cashiers",
   GET: {
-    middleware: [
-      (req, res, next) => {
-        req.query.role = UserRole.Cashier;
-        next();
-      }
-    ],
+    middleware: [setQueryRole(UserRole.Cashier)],
     callback: getUsers
   },
   POST: {
     middleware: [
       userHasRole([UserRole.Cashier]),
-      (req, res, next) => {
-        req.body.role = UserRole.Cashier;
-        next();
-      }
+      setBodyRole(UserRole.Cashier)
     ],
-    callback: createUser
+    callback: postUser
   }
 };
 
@@ -94,23 +75,12 @@ const cooks: Route = {
     }
   ],
   GET: {
-    middleware: [
-      (req, res, next) => {
-        req.query.role = UserRole.Cook;
-        next();
-      }
-    ],
+    middleware: [setQueryRole(UserRole.Cook)],
     callback: getUsers
   },
   POST: {
-    middleware: [
-      userHasRole([UserRole.Cashier]),
-      (req, res, next) => {
-        req.body.role = UserRole.Cook;
-        next();
-      }
-    ],
-    callback: createUser
+    middleware: [userHasRole([UserRole.Cashier]), setBodyRole(UserRole.Cook)],
+    callback: postUser
   }
 };
 
@@ -131,23 +101,12 @@ const waiters: Route = {
     }
   ],
   GET: {
-    middleware: [
-      (req, res, next) => {
-        req.query.role = UserRole.Waiter;
-        next();
-      }
-    ],
+    middleware: [setQueryRole(UserRole.Waiter)],
     callback: getUsers
   },
   POST: {
-    middleware: [
-      userHasRole([UserRole.Cashier]),
-      (req, res, next) => {
-        req.body.role = UserRole.Waiter;
-        next();
-      }
-    ],
-    callback: createUser
+    middleware: [userHasRole([UserRole.Cashier]), setBodyRole(UserRole.Waiter)],
+    callback: postUser
   }
 };
 
@@ -161,7 +120,7 @@ const users: Route = {
       GET: { callback: getUserById },
       PUT: {
         middleware: [userHasRole([UserRole.Cashier])],
-        callback: changePassword
+        callback: putChangePassword
       },
       DELETE: {
         middleware: [userHasRole([UserRole.Cashier])],
@@ -174,10 +133,10 @@ const users: Route = {
     waiters
   ],
   GET: { callback: getUsers },
-  POST: { middleware: [userHasRole([UserRole.Cashier])], callback: createUser }
+  POST: { middleware: [userHasRole([UserRole.Cashier])], callback: postUser }
 };
 
-export function getUsers(req, res, next) {
+function getUsers(req, res, next) {
   const filter = {};
   if (req.query.role) {
     filter["role"] = isUserRole(req.query.role) ? req.query.role : "";
@@ -204,7 +163,7 @@ function getUserById(req, res, next) {
     });
 }
 
-function createUser(req, res, next) {
+function postUser(req, res, next) {
   if (!isCreateUserForm(req.body)) {
     return res.status(400).json(error("Bad request"));
   }
@@ -235,7 +194,7 @@ function createUser(req, res, next) {
     });
 }
 
-function changePassword(req, res, next) {
+function putChangePassword(req, res, next) {
   if (!isChangePasswordForm(req.body)) {
     return res.status(400).json(error("Bad request"));
   }

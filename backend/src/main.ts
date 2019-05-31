@@ -6,7 +6,6 @@ import bodyParser = require("body-parser");
 
 import { app, server, io } from "./server";
 
-import apiRouter from "./controllers";
 import { ioJwtAuth } from "./middlewares/ioJwtAuth";
 import { error } from "./helpers/error";
 import { addParams } from "./middlewares/addParams";
