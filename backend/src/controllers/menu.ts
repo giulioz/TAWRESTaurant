@@ -7,7 +7,7 @@ import {
   isChangeMenuItemForm
 } from "../models/forms/menuItem";
 import { MenuItem, isMenuItemKind } from "../models/menuItem";
-import { Route } from "./RESTaurantAPI";
+import { Route } from ".";
 import { addParams } from "../middlewares/addParams";
 
 export const menu: Route = {
@@ -74,7 +74,6 @@ function getMenuItemById(req, res, next) {
 
 function postMenuItem(req, res, next) {
   if (!isCreateMenuItemForm(req.body)) {
-    console.log(req.body);
     return res.status(400).json(error("Bad request"));
   }
   let menuItem: MenuItem;

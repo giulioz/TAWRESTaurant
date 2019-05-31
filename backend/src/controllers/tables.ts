@@ -11,7 +11,7 @@ import {
 import { isTableStatus, Table, TableStatus } from "../models/table";
 import { ObjectId } from "bson";
 import { isOrderStatus } from "../models/order";
-import { Route } from "./RESTaurantAPI";
+import { Route } from ".";
 import { addParams } from "../middlewares/addParams";
 import { tableByIdOrders as tableByIdOrdersRoute } from "./orders";
 

@@ -1,7 +1,7 @@
 import express = require("express");
 import jsonwebtoken = require("jsonwebtoken");
 import { basicAuth } from "../middlewares/basicAuth";
-import { Route } from "./RESTaurantAPI";
+import { Route } from ".";
 
 function signToken(req, res) {
   const data = {

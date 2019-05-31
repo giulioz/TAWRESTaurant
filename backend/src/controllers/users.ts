@@ -13,7 +13,7 @@ import {
 } from "../models";
 import { UserRole, isUserRole, User } from "../models/user";
 import { isCreateUserForm, isChangePasswordForm } from "../models/forms/user";
-import { Route } from "./RESTaurantAPI";
+import { Route } from ".";
 import { addParams } from "../middlewares/addParams";
 import { setQueryRole, setBodyRole } from "../middlewares/setRole";
 

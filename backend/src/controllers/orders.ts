@@ -1,4 +1,4 @@
-import { Route } from "./RESTaurantAPI";
+import { Route } from ".";
 import {
   TableModel,
   OrderModel,
@@ -47,7 +47,6 @@ function getTableByIdOrders(req, res, next) {
       if (!table) {
         return res.status(404).json(error("Table not found"));
       }
-      console.log(table.orders);
       return res.json(
         table.orders.filter(order => {
           if (!req.query.status || order.status === req.query.status)

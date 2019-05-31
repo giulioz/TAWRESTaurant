@@ -1,15 +1,11 @@
 require("./config");
-
 import mongoose = require("mongoose");
 import express = require("express");
 import bodyParser = require("body-parser");
-
 import { app, server, io } from "./server";
-
 import { ioJwtAuth } from "./middlewares/ioJwtAuth";
 import { error } from "./helpers/error";
-import { addParams } from "./middlewares/addParams";
-import { createRouter, root } from "./controllers/RESTaurantAPI";
+import { createRouter, root } from "./controllers";
 
 (async () => {
   await mongoose.connect(process.env.MONGODB_URL, {
