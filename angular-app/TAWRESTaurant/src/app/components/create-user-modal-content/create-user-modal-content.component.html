@@ -1,0 +1,64 @@
+<form (submit)="onSubmit(form)" #form="ngForm">
+  <div class="modal-header">
+    <h4 class="modal-title">Crea utente</h4>
+    <button type="button" class="close" (click)="activeModal.dismiss()">
+      <span>&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="form-group">
+      <label>Nome utente</label>
+      <input
+        type="text"
+        [(ngModel)]="form.username"
+        name="username"
+        class="form-control"
+        required
+      />
+    </div>
+    <div class="form-group">
+      <label>Nome</label>
+      <input
+        type="text"
+        [(ngModel)]="form.name"
+        name="name"
+        class="form-control"
+        required
+      />
+    </div>
+    <div class="form-group">
+      <label>Cognome</label>
+      <input
+        type="text"
+        [(ngModel)]="form.surname"
+        name="surname"
+        class="form-control"
+        required
+      />
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input
+        type="password"
+        [(ngModel)]="form.password"
+        name="password"
+        class="form-control"
+        required
+      />
+    </div>
+    <div class="form-group">
+      <label>Ruolo</label>
+      <select required [(ngModel)]="form.role" name="role" class="form-control">
+        <option value="Waiter">Waiter</option>
+        <option value="Cook">Cook</option>
+        <option value="Barman">Barman</option>
+        <option value="Cashier">Cashier</option>
+      </select>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="submit" class="btn btn-primary" [disabled]="!form.form.valid">
+      Salva
+    </button>
+  </div>
+</form>

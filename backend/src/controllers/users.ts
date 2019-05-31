@@ -22,26 +22,26 @@ router.use(jwtAuth);
 router.get("/", getUsers);
 
 router
-  .route("/barmans")
+  .route("/waiters")
   .get((req, res, next) => {
-    req.query = { role: UserRole.Barman };
+    req.query = { role: UserRole.Waiter };
     next();
   }, getUsers)
-  .post(userHasRole([UserRole.Cashier]), (req, res, next) => {
-    req.body.role = UserRole.Barman;
-    next();
-  });
+  .post(
+    userHasRole([UserRole.Cashier]),
+    (req, res, next) => {
+      req.body.role = UserRole.Waiter;
+      next();
+    },
+    createUser
+  );
 
-router
-  .route("/cashiers")
-  .get((req, res, next) => {
-    req.query = { role: UserRole.Cashier };
-    next();
-  }, getUsers)
-  .post(userHasRole([UserRole.Cashier]), (req, res, next) => {
-    req.body.role = UserRole.Cashier;
-    next();
+router.get("/waiters/byId/:id/tables", (req, res) => {
+  let id = req.params.id;
+  TableModel.find({ servedBy: id }).then(tables => {
+    res.json(tables);
   });
+});
 
 router
   .route("/cooks")
@@ -49,10 +49,14 @@ router
     req.query = { role: UserRole.Cook };
     next();
   }, getUsers)
-  .post(userHasRole([UserRole.Cashier]), (req, res, next) => {
-    req.body.role = UserRole.Cook;
-    next();
-  });
+  .post(
+    userHasRole([UserRole.Cashier]),
+    (req, res, next) => {
+      req.body.role = UserRole.Cook;
+      next();
+    },
+    createUser
+  );
 
 router.get("/cooks/byId/:id/orders", (req, res) => {
   let id = req.params.id;
@@ -62,22 +66,19 @@ router.get("/cooks/byId/:id/orders", (req, res) => {
 });
 
 router
-  .route("/waiters")
+  .route("/barmans")
   .get((req, res, next) => {
-    req.query = { role: UserRole.Waiter };
+    req.query = { role: UserRole.Barman };
     next();
   }, getUsers)
-  .post(userHasRole([UserRole.Cashier]), (req, res, next) => {
-    req.body.role = UserRole.Waiter;
-    next();
-  });
-
-router.get("/waiters/byId/:id/tables", (req, res) => {
-  let id = req.params.id;
-  TableModel.find({ servedBy: id }).then(tables => {
-    res.json(tables);
-  });
-});
+  .post(
+    userHasRole([UserRole.Cashier]),
+    (req, res, next) => {
+      req.body.role = UserRole.Barman;
+      next();
+    },
+    createUser
+  );
 
 router.get("/barmans/byId/:id/orders", (req, res) => {
   let id = req.params.id;
@@ -86,13 +87,30 @@ router.get("/barmans/byId/:id/orders", (req, res) => {
   });
 });
 
-router.get("/:id", getUserById);
+router
+  .route("/cashiers")
+  .get((req, res, next) => {
+    req.query = { role: UserRole.Cashier };
+    next();
+  }, getUsers)
+  .post(
+    userHasRole([UserRole.Cashier]),
+    (req, res, next) => {
+      req.body.role = UserRole.Cashier;
+      next();
+    },
+    createUser
+  );
 
-router.post("/", userHasRole([UserRole.Cashier]), createUser);
+router.get("/byId/:id", getUserById);
 
-router.put("/:id/password", userHasRole([UserRole.Cashier]), changePassword);
+router.put(
+  "/byId/:id/password",
+  userHasRole([UserRole.Cashier]),
+  changePassword
+);
 
-router.delete("/:id", userHasRole([UserRole.Cashier]), deleteUser);
+router.delete("/byId/:id", userHasRole([UserRole.Cashier]), deleteUser);
 
 export function getUsers(req, res, next) {
   const filter = {};

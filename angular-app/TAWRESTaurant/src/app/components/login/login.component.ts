@@ -9,13 +9,11 @@ import { LoginService } from "src/app/services/login.service";
   styleUrls: ["./login.component.css"]
 })
 export class LoginComponent implements OnInit {
-  username: string = "";
+  loading: boolean = false;
 
-  password: string = "";
+  alert: { type: string; message: string } = null;
 
-  private loading: boolean = false;
-
-  private alert: { type: string; message: string } = null;
+  password;
 
   constructor(
     private router: Router,
@@ -25,20 +23,21 @@ export class LoginComponent implements OnInit {
 
   ngOnInit() {}
 
-  async onSubmit() {
-    if (!this.username || !this.password) return;
-
+  onSubmit(form) {
     this.loading = true;
     this.alert = null;
 
+    const formValue = form.form.value;
+
     this.loginService
-      .login(this.username, this.password)
-      .then(res => {
-        this.authService.setToken(res.token);
-        this.router.navigate(["home"]);
+      .login(formValue.username, formValue.password)
+      .then(async res => {
+        await this.authService.setToken(res.token);
+        this.router.navigate(["/home"]);
       })
       .catch(err => {
         this.loading = false;
+        form.password = "";
         this.alert = {
           type: "warning",
           message: err.error.message || err.error

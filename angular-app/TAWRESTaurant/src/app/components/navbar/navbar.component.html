@@ -1,0 +1,28 @@
+<nav class="navbar navbar-expand-md navbar-dark bg-primary mb-4">
+  <a class="navbar-brand" [routerLink]="['/']">TAWRESTaurant</a>
+
+  <button
+    type="button"
+    class="navbar-toggler hidden-sm-up"
+    (click)="isNavbarCollapsed = !isNavbarCollapsed"
+    *ngIf="auth"
+  >
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div
+    class="collapse navbar-collapse"
+    [ngbCollapse]="isNavbarCollapsed"
+    *ngIf="auth"
+  >
+    <ul class="navbar-nav mr-auto">
+      <app-navs-cashier
+        [auth]="auth"
+        *ngIf="auth.role == 'Cashier'"
+      ></app-navs-cashier>
+    </ul>
+
+    <ul class="navbar-nav mr-0">
+      <app-nav-user-profile [auth]="auth"></app-nav-user-profile>
+    </ul>
+  </div>
+</nav>
