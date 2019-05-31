@@ -118,7 +118,7 @@ const waiters: Route = {
   path: "/waiters",
   subRoutes: [
     {
-      path: "/byId/:id/orders",
+      path: "/byId/:id/tables",
       GET: {
         middleware: [addParams("id", "id")],
         callback: (req, res) => {

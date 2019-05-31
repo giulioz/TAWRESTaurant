@@ -18,16 +18,11 @@ import { createRouter, root } from "./controllers/RESTaurantAPI";
   });
   console.log("Connected to MongoDB");
 
-  // DEBUG
-  /*
   app.use("/static", express.static("public"));
 
   app.use(bodyParser.json());
 
-  app.use("/api/v1", apiRouter);
-  */
-
-  app.use(bodyParser.json(), createRouter(root));
+  app.use(createRouter(root));
 
   // Error handling middleware
   app.use((err, req, res, next) => {
