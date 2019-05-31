@@ -1,3 +1,4 @@
+const express = require("express");
 import {
   getUsers,
   getUserById,
@@ -7,15 +8,20 @@ import {
 } from "./users";
 import { userHasRole } from "../middlewares/userHasRole";
 import { UserRole } from "../models/user";
+import { jwtAuth } from "../middlewares/jwtAuth";
+import { BeverageOrderModel, FoodOrderModel, TableModel } from "../models";
+import { addParams } from "../middlewares/addParams";
+import { basicAuth } from "../middlewares/basicAuth";
+import { login } from "./login";
 
-type METHOD = {
-  guard?: [Function];
-  use: Function;
+export type METHOD = {
+  guards?: [Function];
+  callback: Function;
 };
 
-type Endpoint = {
+export type Endpoint = {
   route: String;
-  middleware?: [Function];
+  middlewares?: Array<Function>;
   endpoints?: Array<Endpoint>;
   GET?: METHOD;
   POST?: METHOD;
@@ -23,24 +29,168 @@ type Endpoint = {
   DELETE?: METHOD;
 };
 
-const users: Endpoint = {
-  route: "/users",
+function createGuard(guards: Array<Function>) {
+  if (!guards || guards.length === 0)
+    return (req, res, next) => {
+      next();
+    };
+  return (req, res, next) => {
+    if (
+      guards.every((guard: Function) => {
+        return guard(req, res);
+      })
+    )
+      next();
+  };
+}
+
+export function createRouter(endpoint: Endpoint) {
+  const { route, middlewares, endpoints, GET, POST, PUT, DELETE } = endpoint;
+  let router = express.Router();
+  if (middlewares)
+    middlewares.forEach((middleware: Function) => {
+      router.use(route, middleware);
+    });
+  if (GET) router.get(route, createGuard(GET.guards), GET.callback);
+  if (POST) router.post(route, createGuard(POST.guards), POST.callback);
+  if (PUT) router.put(route, createGuard(PUT.guards), PUT.callback);
+  if (DELETE) router.delete(route, createGuard(DELETE.guards), DELETE.callback);
+  if (endpoints)
+    endpoints.forEach((endpoint: Endpoint) => {
+      router.use(route, createRouter(endpoint));
+    });
+  return router;
+}
+
+const barmans: Endpoint = {
+  route: "/barmans",
+  middlewares: [
+    (req, res, next) => {
+      req.query.role = UserRole.Barman;
+      next();
+    },
+    addParams("id", "id")
+  ],
   endpoints: [
     {
-      route: "/byId:id",
-      GET: { use: getUserById },
-      PUT: { guard: [userHasRole([UserRole.Cashier])], use: changePassword },
-      DELETE: { guard: [userHasRole([UserRole.Cashier])], use: deleteUser }
-    },
-    {
-      route: "/barmans",
-      GET: { use: getUserById },
-      PUT: { guard: [userHasRole([UserRole.Cashier])], use: changePassword },
-      DELETE: { guard: [userHasRole([UserRole.Cashier])], use: deleteUser }
+      route: "/byId/:id/orders",
+      GET: {
+        callback: (req, res) => {
+          let id = req.urlParams.id;
+          BeverageOrderModel.find({ barman: id }).then(orders => {
+            res.json(orders);
+          });
+        }
+      }
     }
   ],
-  GET: { guard: null, use: getUsers },
-  POST: { guard: [userHasRole([UserRole.Cashier])], use: createUser }
+  GET: { callback: getUsers }
+};
+
+const cashiers: Endpoint = {
+  route: "/cashiers",
+  middlewares: [
+    (req, res, next) => {
+      req.query.role = UserRole.Cashier;
+      next();
+    }
+  ],
+  GET: { callback: getUsers }
+};
+
+const cooks: Endpoint = {
+  route: "/cooks",
+  middlewares: [
+    (req, res, next) => {
+      req.query.role = UserRole.Cook;
+      next();
+    },
+    addParams("id", "id")
+  ],
+  endpoints: [
+    {
+      route: "/byId/:id/orders",
+      GET: {
+        callback: (req, res) => {
+          let id = req.urlParams.id;
+          FoodOrderModel.find({ cook: id }).then(orders => {
+            res.json(orders);
+          });
+        }
+      }
+    }
+  ],
+  GET: { callback: getUsers }
+};
+
+const waiters: Endpoint = {
+  route: "/waiters",
+  middlewares: [
+    (req, res, next) => {
+      req.query.role = UserRole.Waiter;
+      next();
+    },
+    addParams("id", "id")
+  ],
+  endpoints: [
+    {
+      route: "/byId/:id/orders",
+      GET: {
+        callback: (req, res) => {
+          let id = req.urlParams.id;
+          TableModel.find({ servedBy: id }).then(tables => {
+            res.json(tables);
+          });
+        }
+      }
+    }
+  ],
+  GET: { callback: getUsers }
+};
+
+const users: Endpoint = {
+  route: "/users",
+  middlewares: [jwtAuth],
+  endpoints: [
+    {
+      route: "/byId/:id",
+      GET: { callback: getUserById },
+      PUT: {
+        guards: [(req, res) => req.user.role === UserRole.Cashier],
+        callback: changePassword
+      },
+      DELETE: {
+        guards: [(req, res) => req.user.role === UserRole.Cashier],
+        callback: deleteUser
+      }
+    },
+    barmans,
+    cashiers,
+    cooks,
+    waiters
+  ],
+  GET: { callback: getUsers },
+  POST: { guards: [userHasRole([UserRole.Cashier])], callback: createUser }
+};
+
+const apiv1: Endpoint = {
+  route: "/api/v1",
+  endpoints: [login, users],
+  GET: {
+    callback: (req, res) => {
+      res.send("API V1");
+    }
+  }
+};
+
+export const root: Endpoint = {
+  route: "/",
+  endpoints: [apiv1],
+  GET: {
+    callback: (req, res) => {
+      res.send("root");
+    }
+  }
 };
 
 export const endpoints = {
@@ -49,7 +199,7 @@ export const endpoints = {
   },
   "/users": {
     "/": {
-      GET: { guard: ["middleware"], use: getUsers }
+      GET: { guard: ["middleware"], callback: getUsers }
     },
     "/byId/:id": {
       "/": {
@@ -144,5 +294,7 @@ export const endpoints = {
   }
 };
 
+/*
 const util = require("util");
 console.log("endpoints:\n", util.inspect(endpoints, false, null, true));
+*/
