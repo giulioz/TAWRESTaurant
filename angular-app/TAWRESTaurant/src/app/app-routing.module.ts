@@ -38,7 +38,7 @@ const routes: Routes = [
     component: TablesPageComponent,
     canActivate: [AuthGuardService],
     data: {
-      roles: [UserRole.Cashier]
+      roles: [UserRole.Cashier, UserRole.Waiter /* TO REMOVE */]
     }
   }
 ];

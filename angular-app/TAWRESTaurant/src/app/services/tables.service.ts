@@ -26,11 +26,11 @@ export class TablesService {
           Authorization: "Bearer " + (await this.authService.getToken())
         }),
         params: {
-          seats: filter.seats && "" + filter.seats,
-          status: filter.status,
-          servedById: filter.servedBy && filter.servedBy._id,
-          foodOrdersStatus: filter.foodOrdersStatus,
-          beverageOrdersStatus: filter.beverageOrdersStatus
+          seats: (filter.seats && "" + filter.seats) || "",
+          status: filter.status || "",
+          servedById: (filter.servedBy && filter.servedBy._id) || "",
+          foodOrdersStatus: filter.foodOrdersStatus || "",
+          beverageOrdersStatus: filter.beverageOrdersStatus || ""
         },
         responseType: "json"
       })
@@ -52,11 +52,12 @@ export class TablesService {
     return this.http
       .put(
         environment.apiUrl + `/tables/byId/${table._id}`,
-        { action: "occupy" },
+        {},
         {
           headers: new HttpHeaders({
             Authorization: "Bearer " + (await this.authService.getToken())
           }),
+          params: { action: "occupy" },
           responseType: "json"
         }
       )
@@ -67,11 +68,12 @@ export class TablesService {
     return this.http
       .put(
         environment.apiUrl + `/tables/byId/${table._id}`,
-        { action: "free" },
+        {},
         {
           headers: new HttpHeaders({
             Authorization: "Bearer " + (await this.authService.getToken())
           }),
+          params: { action: "free" },
           responseType: "json"
         }
       )

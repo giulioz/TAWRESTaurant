@@ -58,6 +58,12 @@ export class TablesListComponent implements OnInit, OnDestroy {
     }
   }
 
+  occupyTable(table) {
+    this.tablesService.occupyTable(table).then(() => {
+      console.log(`Table ${table.number} has been occupied`);
+    });
+  }
+
   private tableMatchesFilter(table: Table) {
     return (
       table.seats >= this.filter.seats &&

@@ -6,7 +6,6 @@ import { app, server, io } from "./server";
 import { ioJwtAuth } from "./middlewares/ioJwtAuth";
 import { error } from "./helpers/error";
 import { createRouter, root } from "./controllers";
-import { UserRole } from "./models/user";
 import { Socket } from "socket.io";
 
 (async () => {
@@ -35,9 +34,6 @@ import { Socket } from "socket.io";
   // DEBUG
   io.on("connection", (socket: Socket) => {
     socket.emit("greeting", { user: socket.request.user });
-    //console.log(socket.request.user);
-    socket.join("waiters");
-    io.to("waiters").emit("test", { ciao: "a te" });
   });
 
   server.listen(parseInt(process.env.SERVER_PORT), () => {

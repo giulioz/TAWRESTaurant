@@ -15,7 +15,6 @@ import { Route } from ".";
 import { addParams } from "../middlewares/addParams";
 import { tableByIdOrders as tableByIdOrdersRoute } from "./orders";
 import { io } from "../server";
-import { Socket } from "socket.io";
 
 export const tables: Route = {
   path: "/tables",
