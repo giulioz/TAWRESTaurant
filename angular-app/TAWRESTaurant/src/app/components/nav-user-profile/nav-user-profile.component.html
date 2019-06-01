@@ -1,24 +1,26 @@
-<li class="nav-item">
-  <ng-template #popContent>
-    <h5>
-      {{ auth.username }}
-    </h5>
-    <h6 class="text-muted mb-2">{{ auth.name }} {{ auth.surname }}</h6>
-    <p>
-      Ruolo: <i>{{ auth.role }}</i>
-    </p>
-    <div class="mt-2">
-      <button type="button" class="btn btn-primary" (click)="logout()">
-        Esci
-      </button>
-    </div>
-  </ng-template>
-  <a
-    class="nav-link"
-    [routerLink]=""
-    [ngbPopover]="popContent"
-    autoClose="outside"
-  >
-    <i class="fa fa-user-circle fa-2x" aria-hidden="true"> </i>
-  </a>
-</li>
+<ul class="navbar-nav">
+  <li class="nav-item">
+    <ng-template #popContent>
+      <h5>
+        {{ auth.username }}
+      </h5>
+      <h6 class="text-muted mb-2">{{ auth.name }} {{ auth.surname }}</h6>
+      <p>
+        Ruolo: <i>{{ auth.role }}</i>
+      </p>
+      <div class="mt-2">
+        <button type="button" class="btn btn-primary" (click)="logout()">
+          Esci
+        </button>
+      </div>
+    </ng-template>
+    <a
+      class="nav-link"
+      [routerLink]=""
+      [ngbPopover]="popContent"
+      autoClose="outside"
+    >
+      <i class="fa fa-user-circle fa-2x" aria-hidden="true"> </i>
+    </a>
+  </li>
+</ul>

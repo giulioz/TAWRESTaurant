@@ -1,8 +1,6 @@
-import { isTableStatus } from "../table";
 import { enumHasValue } from "../../helpers/enumHasValue";
-import { Query } from "mongoose";
 import { UserRole } from "../user";
-import { isOrderStatus, isOrderKind, OrderKind } from "../order";
+import { isOrderKind, OrderKind } from "../order";
 import { ObjectId } from "bson";
 
 export type CreateOrderForm = {

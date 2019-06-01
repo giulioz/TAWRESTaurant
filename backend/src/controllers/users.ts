@@ -128,7 +128,7 @@ const users: Route = {
           path: "/password",
           PUT: {
             middlewares: [userHasRole([UserRole.Cashier])],
-            callback: putChangePassword
+            callback: changePassword
           }
         }
       ],
@@ -205,7 +205,7 @@ function postUser(req, res, next) {
     });
 }
 
-function putChangePassword(req, res, next) {
+function changePassword(req, res, next) {
   if (!isChangePasswordForm(req.body)) {
     return res.status(400).json(error("Bad request"));
   }

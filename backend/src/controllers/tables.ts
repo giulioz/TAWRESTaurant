@@ -8,7 +8,7 @@ import {
   isChangeStatusRequest,
   ChangeStatus
 } from "../models/forms/table";
-import { isTableStatus, Table, TableStatus } from "../models/table";
+import { Table, TableStatus, isTableStatus } from "../models/table";
 import { ObjectId } from "bson";
 import { isOrderStatus } from "../models/order";
 import { Route } from ".";
@@ -43,8 +43,8 @@ export const tables: Route = {
 function getTables(req, res, next) {
   const {
     seats,
-    tableStatus,
-    waiterId,
+    status,
+    servedById,
     foodOrdersStatus,
     beverageOrdersStatus
   } = req.query;
@@ -52,17 +52,17 @@ function getTables(req, res, next) {
   if (seats) {
     filter["seats"] = { $gte: parseInt(seats) };
   }
-  if (tableStatus && isTableStatus(tableStatus)) {
-    filter["tableStatus"] = tableStatus;
+  if (status && isTableStatus(status)) {
+    filter["status"] = status;
   }
-  if (waiterId && ObjectId.isValid(waiterId)) {
-    filter["servedBy"] = waiterId;
+  if (servedById && ObjectId.isValid(servedById)) {
+    filter["servedBy"] = servedById;
   }
   if (foodOrdersStatus && isOrderStatus(foodOrdersStatus)) {
-    filter["foodOrdersStatus"] = waiterId;
+    filter["foodOrdersStatus"] = servedById;
   }
   if (beverageOrdersStatus && isOrderStatus(beverageOrdersStatus)) {
-    filter["beverageOrdersStatus"] = waiterId;
+    filter["beverageOrdersStatus"] = servedById;
   }
 
   TableModel.find(filter)

@@ -14,15 +14,12 @@
     [ngbCollapse]="isNavbarCollapsed"
     *ngIf="auth"
   >
-    <ul class="navbar-nav mr-auto">
-      <app-navs-cashier
-        [auth]="auth"
-        *ngIf="auth.role == 'Cashier'"
-      ></app-navs-cashier>
-    </ul>
+    <app-navs-cashier
+      class="mr-auto"
+      [auth]="auth"
+      *ngIf="auth.role == 'Cashier'"
+    ></app-navs-cashier>
 
-    <ul class="navbar-nav mr-0">
-      <app-nav-user-profile [auth]="auth"></app-nav-user-profile>
-    </ul>
+    <app-nav-user-profile class="mr-0" [auth]="auth"></app-nav-user-profile>
   </div>
 </nav>

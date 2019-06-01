@@ -28,9 +28,14 @@ export class UsersPageComponent implements OnInit {
     this.modalService
       .open(CreateUserModalContentComponent)
       .result.then(form => {
-        this.usersService.createUser(form).then((user: User) => {
-          this.users.push(user);
-        });
+        this.usersService
+          .createUser(form)
+          .then((user: User) => {
+            this.users.push(user);
+          })
+          .catch(() => {
+            alert("Si è verificato un errore.");
+          });
       })
       .catch(() => {});
   }
@@ -44,13 +49,18 @@ export class UsersPageComponent implements OnInit {
 
     modalRef.result
       .then(form => {
-        this.usersService.changePassword(user, form).then(() => {
-          alert(
-            'La password di "' +
-              user.username +
-              '" è stata cambiata con successo.'
-          );
-        });
+        this.usersService
+          .changePassword(user, form)
+          .then(() => {
+            alert(
+              'La password di "' +
+                user.username +
+                '" è stata cambiata con successo.'
+            );
+          })
+          .catch(() => {
+            alert("Si è verificato un errore.");
+          });
       })
       .catch(() => {});
   }
@@ -61,9 +71,14 @@ export class UsersPageComponent implements OnInit {
         'Sei veramente sicuro di voler eliminare "' + user.username + '"?'
       )
     ) {
-      this.usersService.deleteUser(user).then(() => {
-        this.users = this.users.filter(user1 => user._id !== user1._id);
-      });
+      this.usersService
+        .deleteUser(user)
+        .then(() => {
+          this.users = this.users.filter(user1 => user._id !== user1._id);
+        })
+        .catch(() => {
+          alert("Si è verificato un errore.");
+        });
     }
   }
 }
