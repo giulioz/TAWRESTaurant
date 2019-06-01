@@ -1,5 +1,7 @@
-export const app = require("express")();
+import * as express from "express";
+import * as http from "http";
+import * as socket from "socket.io";
 
-export const server = require("http").Server(app);
-
-export const io = require("socket.io")(server, { path: "/api/v1/events" });
+export const app = express();
+export const server = new http.Server(app);
+export const io = socket(server, { path: "/api/v1/events" });

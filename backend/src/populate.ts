@@ -1,5 +1,5 @@
-require("./config");
-import mongoose = require("mongoose");
+import * as mongoose from "mongoose";
+
 import {
   WaiterModel,
   CookModel,
