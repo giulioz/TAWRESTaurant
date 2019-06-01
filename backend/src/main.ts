@@ -5,7 +5,7 @@ import * as bodyParser from "body-parser";
 import "./config";
 import { app, server, io } from "./server";
 import { ioJwtAuth } from "./middlewares/ioJwtAuth";
-import { error } from "./helpers/error";
+import { error } from "./utils";
 import { createRouter, root } from "./controllers";
 import { Socket } from "socket.io";
 

@@ -1,6 +1,6 @@
 import mongoose = require("mongoose");
 import crypto = require("crypto");
-import { enumHasValue } from "../helpers/enumHasValue";
+import { enumHasValue } from "../utils";
 
 export enum UserRole {
   Waiter = "Waiter",

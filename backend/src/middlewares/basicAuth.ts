@@ -1,6 +1,6 @@
 import passport = require("passport");
 import passportHTTP = require("passport-http");
-import { error } from "../helpers/error";
+import { error } from "../utils";
 import { UserModel } from "../models";
 
 passport.use(

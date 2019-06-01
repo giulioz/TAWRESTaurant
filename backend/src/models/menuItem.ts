@@ -1,5 +1,5 @@
 import mongoose = require("mongoose");
-import { enumHasValue } from "../helpers/enumHasValue";
+import { enumHasValue } from "../utils";
 
 export enum MenuItemKind {
   Food = "Food",

@@ -1,5 +1,5 @@
 import mongoose = require("mongoose");
-import { enumHasValue } from "../helpers/enumHasValue";
+import { enumHasValue } from "../utils";
 import { UserRole, Waiter } from "./user";
 import { Order } from "./order";
 

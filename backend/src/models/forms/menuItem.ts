@@ -1,4 +1,4 @@
-import { enumHasValue } from "../../helpers/enumHasValue";
+import { enumHasValue } from "../../utils";
 import { MenuItemKind } from "../menuItem";
 
 export type CreateMenuItemForm = {

@@ -1,4 +1,4 @@
-import { enumHasValue } from "../../helpers/enumHasValue";
+import { enumHasValue } from "../../utils";
 import { UserRole } from "../user";
 import { isOrderKind, OrderKind } from "../order";
 import { ObjectId } from "bson";

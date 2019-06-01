@@ -1,4 +1,4 @@
-import { enumHasValue } from "../../helpers/enumHasValue";
+import { enumHasValue } from "../../utils";
 import { UserRole } from "../user";
 import { isUndefined } from "util";
 
