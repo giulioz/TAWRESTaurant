@@ -5,7 +5,7 @@ import { TableModel } from "../models";
 import { UserRole } from "../models/user";
 import {
   isCreateTableForm,
-  isChangeStatusRequest,
+  isOccupyFreeRequest,
   ChangeStatus
 } from "../models/forms/table";
 import { Table, TableStatus, isTableStatus } from "../models/table";
@@ -26,7 +26,7 @@ export const tables: Route = {
       middlewares: [addParams("id")],
       subRoutes: [tableByIdOrdersRoute],
       GET: { callback: getTableById },
-      PUT: { callback: changeStatus },
+      PUT: { callback: putChangeStatus },
       DELETE: {
         middlewares: [userHasRole([UserRole.Cashier])],
         callback: deleteTable
@@ -104,8 +104,10 @@ function createTable(req, res, next) {
     });
 }
 
-function changeStatus(req, res, next) {
-  if (!isChangeStatusRequest(req)) {
+function putChangeStatus(req, res, next) {
+  io.to("waiters").emit("test", { ciao: "a te da tables" });
+  console.log(typeof req.query.customers);
+  if (!isOccupyFreeRequest(req)) {
     return res.status(400).json(error("Bad request"));
   }
 
@@ -129,14 +131,14 @@ function changeStatus(req, res, next) {
       table
         .save()
         .then(() => {
-          let serverIo: Socket = io;
-          serverIo.emit("test", { ciao: "a te" });
           if (table.status === TableStatus.NotServed) {
-            serverIo.to(UserRole.Cashier).emit("table is occupied", table);
-            serverIo.to(UserRole.Waiter).emit("table is occupied", table);
+            io.to("waiters").emit("test", { ciao: "a te da tables occupy" });
+            io.to(UserRole.Cashier).emit("table is occupied", table);
+            io.to(UserRole.Waiter).emit("table is occupied", table);
           } else {
-            serverIo.to(UserRole.Cashier).emit("table is free", table);
-            serverIo.to(UserRole.Waiter).emit("table is free", table);
+            io.to("waiters").emit("test", { ciao: "a te da tables free" });
+            io.to(UserRole.Cashier).emit("table is free", table);
+            io.to(UserRole.Waiter).emit("table is free", table);
           }
           return res.send();
         })
