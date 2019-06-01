@@ -1,7 +1,8 @@
-require("./config");
-import mongoose = require("mongoose");
-import express = require("express");
-import bodyParser = require("body-parser");
+import * as mongoose from "mongoose";
+import * as express from "express";
+import * as bodyParser from "body-parser";
+
+import "./config";
 import { app, server, io } from "./server";
 import { ioJwtAuth } from "./middlewares/ioJwtAuth";
 import { error } from "./helpers/error";

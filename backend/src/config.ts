@@ -1,27 +1,17 @@
-const dotEnvConfig = require("dotenv").config();
+import dotEnv from "dotenv";
+const dotEnvConfig = dotEnv.config();
+
+function checkVariable(name: string) {
+  if (!process.env[name]) {
+    console.error(`No ${name} environment variable found. Exiting.`);
+    process.exit(-1);
+  }
+}
 
 if (dotEnvConfig.error) {
-  console.error('Unable to load ".env" file');
-  process.exit(-1);
+  console.warn('Unable to load ".env" file, using defaults from environment.');
 }
 
-if (!process.env.MONGODB_URL) {
-  console.error(
-    '".env" file loaded but MONGODB_URL=<url> key-value pair was not found'
-  );
-  process.exit(-1);
-}
-
-if (!process.env.SERVER_PORT) {
-  console.error(
-    '".env" file loaded but SERVER_PORT=<port> key-value pair was not found'
-  );
-  process.exit(-1);
-}
-
-if (!process.env.JWT_SECRET) {
-  console.error(
-    '".env" file loaded but JWT_SECRET=<secret> key-value pair was not found'
-  );
-  process.exit(-1);
-}
+checkVariable("MONGODB_URL");
+checkVariable("SERVER_PORT");
+checkVariable("JWT_SECRET");
